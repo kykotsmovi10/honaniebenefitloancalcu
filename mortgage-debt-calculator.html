@@ -111,10 +111,14 @@ function LoanTypeToggle({value,onChange}){const opts=['Conventional','FHA','VA']
     </div>
   </div>)}
 
-/* A single line in the right-hand summary panel. `dark` inverts it for the dark panel. */
-function SumRow({label,value,bold,accent,dark}){return(
+/* A single line in the right-hand summary panel. `dark` inverts it for the dark panel.
+   `sub` adds a smaller explanatory line beneath the label. */
+function SumRow({label,value,bold,accent,dark,sub}){return(
   <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:16,padding:'13px 0',borderTop:`1px solid ${dark?'var(--panel-dark-line)':'var(--panel-line)'}`}}>
-    <span style={{fontSize:bold?15:14,fontWeight:bold?700:500,color:bold?(dark?'#fff':'var(--navy)'):(dark?'var(--panel-dark-muted)':'var(--muted)')}}>{label}</span>
+    <span>
+      <span style={{fontSize:bold?15:14,fontWeight:bold?700:500,color:bold?(dark?'#fff':'var(--navy)'):(dark?'var(--panel-dark-muted)':'var(--muted)')}}>{label}</span>
+      {sub&&<span style={{display:'block',fontSize:11.5,fontWeight:400,color:dark?'var(--panel-dark-muted)':'var(--dim)',marginTop:2,lineHeight:1.4}}>{sub}</span>}
+    </span>
     <span style={{fontSize:bold?17:15,fontWeight:bold?700:600,color:accent||(dark?'#fff':'var(--navy-soft)'),whiteSpace:'nowrap'}}>{value}</span>
   </div>)}
 
@@ -128,24 +132,6 @@ function Stat({label,value,sub,color,large}){return(
     <div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.7,marginBottom:6}}>{label}</div>
     <div style={{fontSize:large?27:20,fontWeight:700,color:color||'var(--navy)',letterSpacing:-.7,lineHeight:1.15}}>{value}</div>
     {sub&&<div style={{fontSize:12,color:'var(--muted)',marginTop:5,lineHeight:1.45}}>{sub}</div>}
-  </div>)}
-
-function DebtRow({debt,onUpdate,onRemove,idx}){return(
-  <div style={{display:'flex',gap:10,alignItems:'flex-end',flexWrap:'wrap',padding:'12px 0',borderBottom:'1px solid var(--panel-line)'}}>
-    <div style={{width:22,textAlign:'center',paddingBottom:12}}><span style={{fontSize:12,fontWeight:600,color:'var(--dim)'}}>{idx}</span></div>
-    <div style={{flex:'2 1 160px',display:'flex',flexDirection:'column',gap:6}}>
-      <label style={{fontSize:11.5,fontWeight:600,color:'var(--muted)'}}>Creditor</label>
-      <div className="field" style={{padding:'9px 12px'}}><input value={debt.name} onChange={e=>onUpdate({...debt,name:e.target.value})} placeholder="e.g. Visa, Auto Loan" style={{fontSize:14.5}}/></div>
-    </div>
-    <div style={{flex:'1 1 120px',display:'flex',flexDirection:'column',gap:6}}>
-      <label style={{fontSize:11.5,fontWeight:600,color:'var(--muted)'}}>Balance</label>
-      <div className="field" style={{padding:'9px 12px'}}><span style={{color:'var(--dim)',fontSize:14,fontWeight:500}}>$</span><input type="number" value={debt.balance} onChange={e=>onUpdate({...debt,balance:Number(e.target.value)})} style={{fontSize:14.5}}/></div>
-    </div>
-    <div style={{flex:'1 1 120px',display:'flex',flexDirection:'column',gap:6}}>
-      <label style={{fontSize:11.5,fontWeight:600,color:'var(--muted)'}}>Monthly payment</label>
-      <div className="field" style={{padding:'9px 12px'}}><span style={{color:'var(--dim)',fontSize:14,fontWeight:500}}>$</span><input type="number" value={debt.payment} onChange={e=>onUpdate({...debt,payment:Number(e.target.value)})} style={{fontSize:14.5}}/></div>
-    </div>
-    <button onClick={onRemove} title="Remove debt" aria-label="Remove debt" className="no-print" style={{background:'none',border:'none',cursor:'pointer',color:'var(--dim)',fontSize:20,fontWeight:500,lineHeight:1,padding:'4px 6px',marginBottom:10,transition:'color .15s'}} onMouseEnter={e=>e.currentTarget.style.color='var(--navy)'} onMouseLeave={e=>e.currentTarget.style.color='#aab1c0'}>×</button>
   </div>)}
 
 function CostBar({principal:p,interest:it,saved:sv}){const t=p+it+sv;if(!t)return null;
@@ -168,12 +154,13 @@ function Chart({stdRows:sr,extRows:er,termMonths:tm}){if(!sr.length)return null;
     <g transform={`translate(${W-180},${PT+4})`}><line x1={0} y1={0} x2={20} y2={0} stroke="#a9afbc" strokeWidth={2} strokeDasharray="6 3"/><text x={24} y={4} fontSize={10.5} fill="#7d8699" fontFamily="Inter">Standard payoff</text><line x1={0} y1={18} x2={20} y2={18} stroke="#1e2b4d" strokeWidth={2.8}/><text x={24} y={22} fontSize={10.5} fill="#7d8699" fontFamily="Inter">With extra payments</text></g>
   </svg>)}
 
-function ConsolidationBar({curMtgBal:mb,totDebtBal:db,cashInHand:ch,principal:p}){
+function ConsolidationBar({curMtgBal:mb,totDebtBal:db,cashInHand:ch,closingCost:cc,principal:p}){
   const Part=({label,val,color})=>(<div style={{flex:'1 1 125px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}>{label}</div><div style={{fontSize:19,fontWeight:700,color:color||'var(--navy)',marginTop:4}}>{fmt(val)}</div></div>);
   const Op=({c})=>(<div style={{fontSize:20,fontWeight:400,color:'#c7cddb',userSelect:'none'}}>{c}</div>);
   return(<div style={{marginTop:18,padding:'18px 20px',background:'var(--panel)',borderRadius:8,border:'1px solid var(--border)'}}>
     <div style={{display:'flex',flexWrap:'wrap',gap:14,alignItems:'center'}}>
       <Part label="Current balance" val={mb}/><Op c="+"/><Part label="Debts consolidated" val={db}/>
+      {(cc||0)>0&&<React.Fragment><Op c="+"/><Part label="Closing costs" val={cc}/></React.Fragment>}
       {(ch||0)>0&&<React.Fragment><Op c="+"/><Part label="Cash in hand" val={ch} color="var(--green)"/></React.Fragment>}
       <Op c="="/>
       <div style={{flex:'1 1 160px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--navy)',textTransform:'uppercase',letterSpacing:.6}}>New loan amount</div><div style={{fontSize:27,fontWeight:800,color:'var(--navy)',marginTop:4,letterSpacing:-.8}}>{fmt(p)}</div></div>
@@ -197,9 +184,8 @@ function AmortTable({rows,basePI}){return(
   </div>)}
 
 /* ── Client presentation ───────────────────────────────────── */
-function PresentModal({onClose,R,rate,termYrs,totDebtBal,totDebtPmt,debts,applyDebtSav,extraPmt,curTotalMtg,curMtgBal,cashInHand}){
+function PresentModal({onClose,R,rate,termYrs,totDebtBal,totDebtPmt,applyDebtSav,extraPmt,curTotalMtg,curMtgBal,cashInHand}){
   const epy=Math.floor(R.extA.months/12),epm=R.extA.months%12,ys=Math.floor(R.moSaved/12),ms=R.moSaved%12,tco=curTotalMtg+totDebtPmt;
-  const activeDebts=debts.filter(d=>d.balance>0);
   const Sec=({title,children,style:s})=>(<div style={{marginTop:30,...s}}>
     <h3 style={{fontSize:12,fontWeight:700,color:'var(--muted)',letterSpacing:1.1,textTransform:'uppercase',marginBottom:14}}>{title}</h3>{children}</div>);
 
@@ -221,13 +207,13 @@ function PresentModal({onClose,R,rate,termYrs,totDebtBal,totDebtPmt,debts,applyD
           <div style={{marginTop:26,background:'var(--panel)',borderRadius:12,padding:'26px 28px',textAlign:'center'}}>
             <div style={{fontSize:12,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:1.6}}>Your new total monthly payment</div>
             <div style={{fontSize:56,fontWeight:800,color:'var(--green)',letterSpacing:-2.5,lineHeight:1.05,marginTop:6}}>{fmt0(R.totalPITI)}<span style={{fontSize:22,fontWeight:600,color:'var(--muted)',letterSpacing:-.5}}>/mo</span></div>
-            <div style={{fontSize:13.5,color:'var(--muted)',marginTop:6}}>Down from {fmt0(tco)}/mo across your mortgage and {activeDebts.length} debts</div>
+            <div style={{fontSize:13.5,color:'var(--muted)',marginTop:6}}>Down from {fmt0(tco)}/mo across your mortgage and other monthly debts</div>
           </div>
 
           <Sec title="What you pay today">
             <div style={{border:'1px solid var(--border)',borderRadius:10,padding:'6px 20px 14px'}}>
-              <SumRow label="Mortgage payment (PITI)" value={fmt(curTotalMtg)}/>
-              <SumRow label="Monthly debt payments" value={fmt(totDebtPmt)}/>
+              <SumRow label="Mortgage payment (PITI)" sub="Principal, interest, taxes and insurance" value={fmt(curTotalMtg)}/>
+              <SumRow label="Current monthly debt payments" sub="(Monthly debt payments)" value={fmt(totDebtPmt)}/>
               <SumRow label="Total monthly outgoing" value={fmt(tco)} bold/>
             </div>
           </Sec>
@@ -243,28 +229,23 @@ function PresentModal({onClose,R,rate,termYrs,totDebtBal,totDebtPmt,debts,applyD
             </div>
           </Sec>
 
-          {activeDebts.length>0&&<Sec title="Debts paid off at closing">
+          {totDebtBal>0&&<Sec title="Debts paid off at closing">
             <div style={{borderRadius:10,border:'1px solid var(--border)',overflow:'hidden'}}>
               <table style={{width:'100%',borderCollapse:'collapse',fontSize:13.5}}>
                 <thead><tr style={{background:'var(--navy)'}}>
-                  {['Creditor','Balance','Current payment','New payment'].map((h,i)=><th key={h} style={{padding:'12px 16px',textAlign:i===0?'left':i===3?'center':'right',fontSize:11,fontWeight:600,color:'#fff',textTransform:'uppercase',letterSpacing:.8}}>{h}</th>)}
+                  {['','Balance paid off','Payment today','Payment after'].map((h,i)=><th key={i} style={{padding:'12px 16px',textAlign:i===0?'left':i===3?'center':'right',fontSize:11,fontWeight:600,color:'#fff',textTransform:'uppercase',letterSpacing:.8}}>{h}</th>)}
                 </tr></thead>
-                <tbody>{activeDebts.map((d,i)=>(
-                  <tr key={i} style={{background:i%2===0?'#fff':'var(--panel)',borderBottom:'1px solid var(--panel-line)'}}>
-                    <td style={{padding:'12px 16px',fontWeight:600,color:'var(--navy-soft)'}}>{d.name||'Unnamed'}</td>
-                    <td style={{padding:'12px 16px',textAlign:'right',fontWeight:600,color:'var(--navy)'}}>{fmt(d.balance)}</td>
-                    <td style={{padding:'12px 16px',textAlign:'right',fontWeight:600,color:'var(--navy)'}}>{fmt(d.payment)}</td>
-                    <td style={{padding:'12px 16px',textAlign:'center'}}><span style={{display:'inline-block',background:'var(--callout)',color:'var(--green-deep)',padding:'5px 14px',borderRadius:14,fontSize:13.5,fontWeight:700}}>$0.00</span></td>
-                  </tr>))}</tbody>
-                <tfoot><tr style={{background:'var(--panel)',borderTop:'2px solid var(--navy)'}}>
-                  <td style={{padding:'13px 16px',fontWeight:700,color:'var(--navy)'}}>Totals</td>
-                  <td style={{padding:'13px 16px',textAlign:'right',fontWeight:700,color:'var(--navy)'}}>{fmt(totDebtBal)}</td>
-                  <td style={{padding:'13px 16px',textAlign:'right',fontWeight:700,color:'var(--navy)'}}>{fmt(totDebtPmt)}/mo</td>
-                  <td style={{padding:'13px 16px',textAlign:'center',fontWeight:700,color:'var(--green)'}}>$0.00</td>
-                </tr></tfoot>
+                <tbody>
+                  <tr style={{background:'#fff'}}>
+                    <td style={{padding:'14px 16px',fontWeight:600,color:'var(--navy-soft)'}}>All debts being consolidated</td>
+                    <td style={{padding:'14px 16px',textAlign:'right',fontWeight:700,color:'var(--navy)',fontSize:15}}>{fmt(totDebtBal)}</td>
+                    <td style={{padding:'14px 16px',textAlign:'right',fontWeight:700,color:'var(--navy)',fontSize:15}}>{fmt(totDebtPmt)}/mo</td>
+                    <td style={{padding:'14px 16px',textAlign:'center'}}><span style={{display:'inline-block',background:'var(--callout)',color:'var(--green-deep)',padding:'5px 14px',borderRadius:14,fontSize:13.5,fontWeight:700}}>$0.00</span></td>
+                  </tr>
+                </tbody>
               </table>
             </div>
-            <div style={{marginTop:12}}><Callout>All {activeDebts.length} debts are paid in full at closing and folded into one mortgage payment — {activeDebts.length} separate bills go away.</Callout></div>
+            <div style={{marginTop:12}}><Callout>These debts are paid in full at closing and folded into one mortgage payment — {fmt(totDebtPmt)} a month in separate bills goes away.</Callout></div>
           </Sec>}
 
           {(cashInHand||0)>0&&<Sec title="Cash in hand at closing">
@@ -348,23 +329,20 @@ function App(){
   const curMoMI=curLoanType==='FHA'?(curMIPMode==='annual'?(curMIP||0)/12:(curMIP||0)):0;
   const curTotalMtg=(curPI||0)+curMoEscrow+curMoMI;
 
-  const[debts,setDebts]=useState([{id:1,name:"Visa Credit Card",balance:8500,payment:250},{id:2,name:"Mastercard",balance:5200,payment:160},{id:3,name:"Auto Loan",balance:15000,payment:420},{id:4,name:"Student Loan",balance:12000,payment:180},{id:5,name:"Personal Loan",balance:4800,payment:125}]);
-  const[nextId,setNextId]=useState(6);
-  const addDebt=()=>{setDebts([...debts,{id:nextId,name:"",balance:0,payment:0}]);setNextId(nextId+1)};
-  const rmDebt=id=>setDebts(debts.filter(d=>d.id!==id));
-  const updDebt=(id,u)=>setDebts(debts.map(d=>d.id===id?u:d));
-  const totDebtBal=debts.reduce((s,d)=>s+(d.balance||0),0),totDebtPmt=debts.reduce((s,d)=>s+(d.payment||0),0);
-  const activeDebtCount=debts.filter(d=>d.balance>0).length;
+  // Debts being consolidated, entered as two totals rather than line by line.
+  const[totDebtBal,setTotDebtBal]=useState(45500);
+  const[totDebtPmt,setTotDebtPmt]=useState(1135);
 
   const[rate,setRate]=useState(6.75);const[termYrs,setTermYrs]=useState(30);
   const[annTax,setAnnTax]=useState(3600);const[taxMode,setTaxMode]=useState('annual');
   const[annIns,setAnnIns]=useState(1500);const[insMode,setInsMode]=useState('annual');
   const[cashInHand,setCashInHand]=useState(0);
+  const[closingCost,setClosingCost]=useState(0);
   const[extraPmt,setExtraPmt]=useState(0);const[applyDebtSav,setApplyDebtSav]=useState(true);
   const[showAmort,setShowAmort]=useState(false);const[showPresent,setShowPresent]=useState(false);
 
   const R=useMemo(()=>{
-    const principal=(curMtgBal||0)+totDebtBal+(cashInHand||0);
+    const principal=(curMtgBal||0)+totDebtBal+(cashInHand||0)+(closingCost||0);
     const ar=(rate||0)/100,tm=(termYrs||30)*12;
     const mTax=taxMode==='annual'?(annTax||0)/12:(annTax||0);
     const mIns=insMode==='annual'?(annIns||0)/12:(annIns||0);
@@ -378,13 +356,13 @@ function App(){
     const moSaved=stdA.months-extA.months;
     const effRate=totalExtra>0?findEffRate(principal,extA.totalInterest,tm):ar;
     return{principal,basePI,totalPITI,monthlySav,totalExtra,stdA,extA,intSaved,moSaved,effRate,ar,tm,mTax,mIns,mMI:0};
-  },[curMtgBal,rate,termYrs,annTax,taxMode,annIns,insMode,cashInHand,extraPmt,debts,applyDebtSav,totDebtBal,totDebtPmt,curTotalMtg]);
+  },[curMtgBal,rate,termYrs,annTax,taxMode,annIns,insMode,cashInHand,closingCost,extraPmt,applyDebtSav,totDebtBal,totDebtPmt,curTotalMtg]);
 
   const ys=Math.floor(R.moSaved/12),ms=R.moSaved%12,epy=Math.floor(R.extA.months/12),epm=R.extA.months%12;
   const tco=curTotalMtg+totDebtPmt;
 
   return(<div style={{maxWidth:1120,margin:'0 auto',padding:'26px 18px 72px'}}>
-    {showPresent&&<PresentModal onClose={()=>setShowPresent(false)} R={R} rate={rate} termYrs={termYrs} totDebtBal={totDebtBal} totDebtPmt={totDebtPmt} debts={debts} applyDebtSav={applyDebtSav} extraPmt={extraPmt} curTotalMtg={curTotalMtg} curMtgBal={curMtgBal} cashInHand={cashInHand}/>}
+    {showPresent&&<PresentModal onClose={()=>setShowPresent(false)} R={R} rate={rate} termYrs={termYrs} totDebtBal={totDebtBal} totDebtPmt={totDebtPmt} applyDebtSav={applyDebtSav} extraPmt={extraPmt} curTotalMtg={curTotalMtg} curMtgBal={curMtgBal} cashInHand={cashInHand}/>}
 
     {/* Masthead */}
     <div className="animate-in" style={{background:'var(--navy)',borderRadius:'10px 10px 0 0',padding:'20px 28px',display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,flexWrap:'wrap'}}>
@@ -449,9 +427,9 @@ function App(){
 
         <div style={{marginTop:16}}>
           <Callout dark>
-            {activeDebtCount>0
-              ? <>That's the mortgage plus {activeDebtCount} separate debt payments. Consolidating replaces all of it with one payment of <strong style={{color:'#fff'}}>{fmt0(R.totalPITI)}/mo</strong>.</>
-              : <>Add their debts below to see what consolidating into one payment would look like.</>}
+            {totDebtPmt>0
+              ? <>That's the mortgage plus {fmt0(totDebtPmt)}/mo in other debt payments. Consolidating replaces all of it with one payment of <strong style={{color:'#fff'}}>{fmt0(R.totalPITI)}/mo</strong>.</>
+              : <>Add the debt totals below to see what consolidating into one payment would look like.</>}
           </Callout>
         </div>
 
@@ -462,7 +440,7 @@ function App(){
           <SumRow dark label="Insurance / mo" value={fmt(curMoIns)}/>
           {curLoanType==='FHA'&&<SumRow dark label="MIP / mo" value={fmt(curMoMI)}/>}
           <SumRow dark label="Current mortgage payment" value={fmt(curTotalMtg)} bold/>
-          <SumRow dark label={`Debt payments (${activeDebtCount})`} value={fmt(totDebtPmt)}/>
+          <SumRow dark label="Debt payments" value={fmt(totDebtPmt)}/>
           <SumRow dark label="Total monthly outgoing" value={fmt(tco)} bold accent="var(--green-bright)"/>
         </div>
 
@@ -472,13 +450,17 @@ function App(){
 
     <div style={{display:'flex',flexDirection:'column',gap:18,marginTop:18}}>
 
-      <Card title="Debts to consolidate" subtitle="Each debt from the credit report that will be rolled into the new mortgage." delay={80}>
-        <div style={{display:'flex',flexDirection:'column'}}>{debts.map((d,i)=><DebtRow key={d.id} debt={d} idx={i+1} onUpdate={u=>updDebt(d.id,u)} onRemove={()=>rmDebt(d.id)}/>)}</div>
-        <button onClick={addDebt} className="no-print" style={{marginTop:16,background:'#fff',border:'1.5px dashed var(--border)',borderRadius:8,padding:'11px 22px',cursor:'pointer',fontSize:13.5,fontWeight:600,color:'var(--muted)',fontFamily:'inherit',transition:'all .2s'}} onMouseEnter={e=>{e.currentTarget.style.borderColor='var(--navy)';e.currentTarget.style.color='var(--navy)'}} onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--border)';e.currentTarget.style.color='var(--muted)'}}>+ Add debt</button>
+      <Card title="Debts to be paid off in the loan" subtitle="Total balances and total monthly payments across every debt being rolled into the new mortgage." delay={80}>
+        <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
+          <Inp label="Total debt balance" value={totDebtBal} onChange={setTotDebtBal} prefix="$"
+               hint="Everything being paid off at closing, added together."/>
+          <Inp label="Total monthly debt payments" value={totDebtPmt} onChange={setTotDebtPmt} prefix="$"
+               hint="What they pay each month across all of those debts today."/>
+        </div>
 
         <div style={{marginTop:18,padding:'18px 20px',background:'var(--panel)',borderRadius:8,border:'1px solid var(--border)',display:'flex',flexWrap:'wrap',gap:20}}>
-          <div style={{flex:'1 1 150px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}>Total debt balance</div><div style={{fontSize:23,fontWeight:700,color:'var(--navy)',marginTop:4}}>{fmt(totDebtBal)}</div></div>
-          <div style={{flex:'1 1 150px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}>Total debt payments</div><div style={{fontSize:23,fontWeight:700,color:'var(--navy)',marginTop:4}}>{fmt(totDebtPmt)}<span style={{fontSize:13,fontWeight:500,color:'var(--muted)'}}>/mo</span></div></div>
+          <div style={{flex:'1 1 150px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}>Current mortgage</div><div style={{fontSize:23,fontWeight:700,color:'var(--navy)',marginTop:4}}>{fmt(curTotalMtg)}<span style={{fontSize:13,fontWeight:500,color:'var(--muted)'}}>/mo</span></div></div>
+          <div style={{flex:'1 1 150px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}>Debt payments</div><div style={{fontSize:23,fontWeight:700,color:'var(--navy)',marginTop:4}}>{fmt(totDebtPmt)}<span style={{fontSize:13,fontWeight:500,color:'var(--muted)'}}>/mo</span></div></div>
           <div style={{flex:'1 1 170px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--green-deep)',textTransform:'uppercase',letterSpacing:.6}}>Total monthly outgoing</div><div style={{fontSize:26,fontWeight:800,color:'var(--green)',marginTop:4,letterSpacing:-.8}}>{fmt(tco)}<span style={{fontSize:13,fontWeight:500,color:'var(--muted)'}}>/mo</span></div></div>
         </div>
       </Card>
@@ -491,9 +473,10 @@ function App(){
         <div style={{display:'flex',flexWrap:'wrap',gap:14,marginTop:16}}>
           <ModeInp label="Property taxes" value={annTax} onChange={setAnnTax} mode={taxMode} onModeChange={setTaxMode} prefix="$"/>
           <ModeInp label="Homeowners insurance" value={annIns} onChange={setAnnIns} mode={insMode} onModeChange={setInsMode} prefix="$"/>
+          <Inp label="Closing costs" value={closingCost} onChange={setClosingCost} prefix="$" hint="Rolled into the new loan."/>
           <Inp label="Cash in hand" value={cashInHand} onChange={setCashInHand} prefix="$"/>
         </div>
-        <ConsolidationBar curMtgBal={curMtgBal} totDebtBal={totDebtBal} cashInHand={cashInHand} principal={R.principal}/>
+        <ConsolidationBar curMtgBal={curMtgBal} totDebtBal={totDebtBal} cashInHand={cashInHand} closingCost={closingCost} principal={R.principal}/>
       </Card>
 
       <Card title="Monthly payment comparison" delay={160}>
