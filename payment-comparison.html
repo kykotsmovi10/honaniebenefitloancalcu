@@ -4,64 +4,88 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Side by Side Payment Comparison</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#1e2b4d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --navy: #0a1628;
-    --navy-mid: #112240;
-    --orange: #6b7fa3;
-    --orange-bg: #e8ecf4;
-    --orange-panel: #5a6e94;
-    --blue: #4a7ab5;
-    --blue-bg: #dce8f8;
-    --blue-panel: #3d6fa3;
-    --gold: #d4a017;
-    --gold-light: #f0c040;
+    --navy: #1e2b4d;
+    --navy-deep: #172239;
+    --navy-soft: #2b3652;
+    --gold: #c3a163;
+    --green: #6f7f2e;        /* fills, chart bars */
+    --green-text: #68762b;   /* same green, darkened for small text on white (WCAG AA) */
+    --green-deep: #3e4a1e;
+    --green-bright: #a8c44a;
+    --callout: #eef3d8;
+    --red: #b03030;
+
+    --panel: #f1f4f9;
+    --panel-line: #dee1e9;
+    --border: #dfe4ee;
+    --card: #ffffff;
     --white: #ffffff;
-    --off-white: #f8f6f3;
-    --text-dark: #1a1a2e;
-    --text-mid: #3a3a5c;
-    --text-light: #6b6b8a;
-    --border: #d0cfe0;
-    --green: #1a7a3c;
-    --red: #c0392b;
-    --shadow: 0 4px 24px rgba(10,22,40,0.13);
+
+    --panel-dark: #141a26;
+    --panel-dark-line: #2c3548;
+    --panel-dark-muted: #9aa3b5;
+
+    --ink: #1e2b4d;
+    --muted: #1a1a1a;
+    --dim: #7d8699;
+
+    --shadow-sm: 0 2px 8px rgba(30,43,77,0.07);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--off-white);
-    color: var(--text-dark);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--panel);
+    color: var(--ink);
     min-height: 100vh;
+    font-feature-settings: 'tnum' 1;
+    -webkit-font-smoothing: antialiased;
   }
 
-  input[type="number"] { -moz-appearance: textfield; }
+  input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   input[type="number"]::-webkit-outer-spin-button,
-  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
-  .page {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 24px 20px 60px;
+  /* ── HEADER ── */
+  .site-header {
+    background: var(--navy);
+    padding: 22px 40px;
+  }
+  .site-header h1 {
+    font-size: 23px; font-weight: 700;
+    color: var(--white); letter-spacing: -0.4px;
+  }
+  .site-header h1 span { color: var(--gold); }
+  .header-sub {
+    font-size: 12.5px; font-weight: 600; color: var(--gold);
+    text-transform: uppercase; letter-spacing: 2px; margin-top: 4px;
   }
 
+  .page { max-width: 1000px; margin: 0 auto; padding: 24px 24px 60px; }
+
+  /* ── TOOL CARD ── */
   .tool-wrapper {
-    background: var(--white);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 10px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
   .tool-header {
     background: var(--navy);
     color: var(--white);
-    text-align: center;
-    padding: 16px 20px;
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 1.4rem; font-weight: 700;
-    letter-spacing: 0.02em;
+    padding: 16px 24px;
+    font-size: 17px; font-weight: 700;
+    letter-spacing: -0.3px;
   }
   .tool-body {
     display: grid;
@@ -69,10 +93,505 @@
     gap: 0;
   }
 
-  .panel { padding: 28px 32px 32px; }
-  .panel-left { background: var(--orange-bg); border-right: 1px solid #ddd; }
-  .panel-right { background: var(--blue-bg); border-left: 1px solid #ddd; }
+  .panel { padding: 24px 26px 26px; }
+  .panel-left { background: var(--card); border-right: 1px solid var(--border); }
+  .panel-right { background: var(--card); }
 
+  /* ── CENTER DIFFERENCE (dark panel) ── */
+  .center-col {
+    background: var(--panel-dark);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 24px 22px;
+    min-width: 176px;
+  }
+  .diff-label {
+    font-size: 12px; letter-spacing: 1.6px;
+    text-transform: uppercase; color: var(--panel-dark-muted);
+    font-weight: 600; margin-bottom: 8px; text-align: center;
+  }
+  .diff-value {
+    font-size: 30px; font-weight: 800;
+    letter-spacing: -1.2px; line-height: 1.1; text-align: center;
+    color: var(--green-bright);
+  }
+  .diff-value.pos { color: var(--green-bright); }
+  .diff-value.neg { color: #e08a8a; }
+  .diff-value.zero { color: var(--panel-dark-muted); }
+  .diff-sub {
+    font-size: 12px; color: var(--panel-dark-muted);
+    text-align: center; margin-top: 8px; line-height: 1.4;
+  }
+
+  /* ── PANEL TITLES ── */
+  .panel-title {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 18px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── FIELDS ── */
+  .field-row {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px; min-height: 38px; gap: 12px;
+  }
+  .field-label {
+    font-size: 13px; color: var(--muted); font-weight: 600;
+    letter-spacing: -0.1px; flex: 1; line-height: 1.4;
+  }
+  .field-label .hint {
+    color: var(--dim); font-size: 12px; font-weight: 500;
+  }
+  .field-input {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    color: var(--ink);
+    font-size: 15px; font-weight: 600;
+    font-family: inherit;
+    padding: 8px 11px; width: 150px; text-align: right;
+    border-radius: 8px; outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field-input:focus {
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(30,43,77,0.08);
+  }
+  .field-input::placeholder { color: var(--dim); font-weight: 500; }
+
+  .computed-val {
+    font-size: 15px; font-weight: 700;
+    letter-spacing: -0.2px;
+    min-width: 150px; text-align: right;
+    color: var(--navy);
+  }
+  .computed-val.left-color { color: var(--navy); }
+  .computed-val.right-color { color: var(--navy); }
+
+  .divider {
+    border: none; border-top: 1px solid var(--border);
+    margin: 14px 0;
+  }
+
+  .total-row {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding-top: 12px; margin-top: 4px;
+    border-top: 1.5px solid var(--panel-line);
+  }
+  .total-label {
+    font-size: 13px; font-weight: 700;
+    color: var(--ink); letter-spacing: -0.1px;
+  }
+  .total-value {
+    font-size: 20px; font-weight: 800;
+    letter-spacing: -0.6px;
+  }
+  .total-value.left-color { color: var(--navy); }
+  .total-value.right-color { color: var(--navy); }
+
+  .print-val {
+    display: none;
+    font-size: 15px; font-weight: 700;
+    color: var(--navy);
+    min-width: 150px; text-align: right;
+  }
+
+  /* ── EFFECTIVE RATE SECTION ── */
+  .eff-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .eff-header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 16px 24px;
+    font-size: 17px; font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .eff-header span { color: var(--gold); font-weight: 600; }
+  .eff-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .eff-card { padding: 26px 30px; text-align: center; }
+  .eff-card:first-child { border-right: 1px solid var(--border); }
+  .eff-card-label {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--dim); margin-bottom: 14px;
+  }
+  .eff-card-rate {
+    font-size: 44px; font-weight: 800;
+    letter-spacing: -1.8px; line-height: 1;
+    color: var(--navy);
+  }
+  .eff-card-rate.left-color { color: var(--green-text); }
+  .eff-card-rate.right-color { color: var(--green-text); }
+  .eff-card-rate.muted { color: var(--dim); }
+  .eff-card-sub {
+    font-size: 13px; color: var(--muted);
+    margin-top: 12px; line-height: 1.6;
+    font-weight: 500;
+  }
+  .eff-card-sub strong { color: var(--navy); font-weight: 700; }
+  .eff-card-detail {
+    margin-top: 18px; padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: center; gap: 30px;
+    flex-wrap: wrap;
+  }
+  .eff-stat { text-align: center; }
+  .eff-stat-label {
+    font-size: 10.5px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.9px;
+    color: var(--dim); margin-bottom: 5px;
+  }
+  .eff-stat-val {
+    font-size: 15px; font-weight: 700;
+    color: var(--navy); letter-spacing: -0.2px;
+  }
+  .eff-stat-val.green { color: var(--green-text); }
+
+  .note {
+    font-size: 12px; color: var(--dim); line-height: 1.6;
+    margin-top: 18px; text-align: center;
+  }
+
+  @media print {
+    body { background: #fff; }
+    .page { padding: 10px; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    input { display: none !important; }
+    .print-val { display: inline !important; }
+    .center-col { display: none !important; }
+  }
+
+  @media (max-width: 900px) {
+    .tool-body { grid-template-columns: 1fr; }
+    .center-col { order: -1; padding: 20px; }
+    .panel { padding: 20px; }
+    .panel-left { border-right: none; border-bottom: 1px solid var(--border); }
+    .field-input { width: 128px; }
+    .computed-val { min-width: 128px; }
+    .eff-body { grid-template-columns: 1fr; }
+    .eff-card:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+    .site-header { padding: 18px 20px; }
+    .page { padding: 16px 14px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>Side by Side <span>Payment Comparison</span></h1>
+  <div class="header-sub">Current Loan vs New Loan</div>
+</header>
+
+<div class="page">
+  <div class="tool-wrapper">
+    <div class="tool-header">Monthly payment comparison</div>
+    <div class="tool-body">
+
+      <!-- LEFT PANEL -->
+      <div class="panel panel-left">
+        <div class="panel-title">Current loan</div>
+        <div class="field-row">
+          <span class="field-label">Loan amount <span class="hint">(original loan amount)</span></span>
+          <span class="input-wrap">
+            <input type="number" class="field-input" id="l-amount" placeholder="$0.00" min="0" step="1000" oninput="calc()">
+            <span class="print-val" id="l-amount-pv"></span>
+          </span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Term in months <span class="hint">(original term)</span></span>
+          <span class="input-wrap">
+            <input type="number" class="field-input" id="l-months" placeholder="360" min="1" oninput="calc()">
+            <span class="print-val" id="l-months-pv"></span>
+          </span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Interest rate (%)</span>
+          <span class="input-wrap">
+            <input type="number" class="field-input" id="l-rate" placeholder="0.00" min="0" max="30" step="0.001" oninput="calc()">
+            <span class="print-val" id="l-rate-pv"></span>
+          </span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Payment</span>
+          <span class="computed-val left-color" id="l-payment">—</span>
+        </div>
+        <hr class="divider">
+        <div class="field-row">
+          <span class="field-label">Property tax (monthly)</span>
+          <span class="input-wrap">
+            <input type="number" class="field-input" id="l-tax" placeholder="$0.00" min="0" step="10" oninput="calc()">
+            <span class="print-val" id="l-tax-pv"></span>
+          </span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">HOI (monthly)</span>
+          <span class="input-wrap">
+            <input type="number" class="field-input" id="l-hoi" placeholder="$0.00" min="0" step="10" oninput="calc()">
+            <span class="print-val" id="l-hoi-pv"></span>
+          </span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Extra payment above the minimum</span>
+          <span class="input-wrap">
+            <input type="number" class="field-input" id="l-extra" placeholder="$0.00" min="0" step="50" oninput="calc()">
+            <span class="print-val" id="l-extra-pv"></span>
+          </span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Total debt payments (monthly)</span>
+          <span class="input-wrap">
+            <input type="number" class="field-input" id="l-debt" placeholder="$0.00" min="0" step="10" oninput="calc()">
+            <span class="print-val" id="l-debt-pv"></span>
+          </span>
+        </div>
+        <div class="total-row">
+          <span class="total-label">Total</span>
+          <span class="total-value left-color" id="l-total">—</span>
+        </div>
+      </div>
+
+      <!-- CENTER: DIFFERENCE -->
+      <div class="center-col">
+        <div class="diff-label">Difference</div>
+        <div class="diff-value zero" id="diff-val">—</div>
+        <div class="diff-sub" id="diff-sub">Left vs Right</div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="panel panel-right">
+        <div class="panel-title">New loan</div>
+        <div class="field-row">
+          <span class="field-label">Loan amount</span>
+          <span class="input-wrap">
+            <input type="number" class="field-input" id="r-amount" placeholder="$0.00" min="0" step="1000" oninput="calc()">
+            <span class="print-val" id="r-amount-pv"></span>
+          </span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Term in months</span>
+          <span class="input-wrap">
+            <input type="number" class="field-input" id="r-months" placeholder="360" min="1" oninput="calc()">
+            <span class="print-val" id="r-months-pv"></span>
+          </span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Interest rate (%)</span>
+          <span class="input-wrap">
+            <input type="number" class="field-input" id="r-rate" placeholder="0.00" min="0" max="30" step="0.001" oninput="calc()">
+            <span class="print-val" id="r-rate-pv"></span>
+          </span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Payment</span>
+          <span class="computed-val right-color" id="r-payment">—</span>
+        </div>
+        <hr class="divider">
+        <div class="field-row">
+          <span class="field-label">Property tax (monthly)</span>
+          <span class="input-wrap">
+            <input type="number" class="field-input" id="r-tax" placeholder="$0.00" min="0" step="10" oninput="calc()">
+            <span class="print-val" id="r-tax-pv"></span>
+          </span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">HOI (monthly)</span>
+          <span class="input-wrap">
+            <input type="number" class="field-input" id="r-hoi" placeholder="$0.00" min="0" step="10" oninput="calc()">
+            <span class="print-val" id="r-hoi-pv"></span>
+          </span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Extra payment above the minimum</span>
+          <span class="input-wrap">
+            <input type="number" class="field-input" id="r-extra" placeholder="$0.00" min="0" step="50" oninput="calc()">
+            <span class="print-val" id="r-extra-pv"></span>
+          </span>
+        </div>
+        <div class="total-row">
+          <span class="total-label">Total</span>
+          <span class="total-value right-color" id="r-total">—</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EFFECTIVE RATE SECTION -->
+  <div class="eff-section">
+    <div class="eff-header">Effective rate <span>— what your rate really acts like</span></div>
+    <div class="eff-body">
+      <div class="eff-card">
+        <div class="eff-card-label">Current loan — effective rate</div>
+        <div class="eff-card-rate left-color" id="l-eff-rate">—</div>
+        <div class="eff-card-sub" id="l-eff-sub">Enter loan details and an extra payment to see the effective rate</div>
+        <div class="eff-card-detail" id="l-eff-detail" style="display:none">
+          <div class="eff-stat"><div class="eff-stat-label">Interest saved</div><div class="eff-stat-val green" id="l-eff-saved">—</div></div>
+          <div class="eff-stat"><div class="eff-stat-label">Payoff</div><div class="eff-stat-val" id="l-eff-payoff">—</div></div>
+          <div class="eff-stat"><div class="eff-stat-label">Months saved</div><div class="eff-stat-val green" id="l-eff-mosaved">—</div></div>
+        </div>
+      </div>
+      <div class="eff-card">
+        <div class="eff-card-label">New loan — effective rate</div>
+        <div class="eff-card-rate right-color" id="r-eff-rate">—</div>
+        <div class="eff-card-sub" id="r-eff-sub">Enter loan details and an extra payment to see the effective rate</div>
+        <div class="eff-card-detail" id="r-eff-detail" style="display:none">
+          <div class="eff-stat"><div class="eff-stat-label">Interest saved</div><div class="eff-stat-val green" id="r-eff-saved">—</div></div>
+          <div class="eff-stat"><div class="eff-stat-label">Payoff</div><div class="eff-stat-val" id="r-eff-payoff">—</div></div>
+          <div class="eff-stat"><div class="eff-stat-label">Months saved</div><div class="eff-stat-val green" id="r-eff-mosaved">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">For illustration only. Not a loan commitment or financial advice. Actual terms, rates, and payments may vary.</p>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const fmt=n=>n<=0?'$0.00':'$'+n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+const fmtN=n=>'$'+Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+const num=id=>{const v=parseFloat($(id).value);return isNaN(v)?0:v};
+
+function pmtCalc(P,annualRate,months){
+  if(!P||!annualRate||!months)return 0;
+  const r=annualRate/100/12;
+  if(r===0)return P/months;
+  return P*(r*Math.pow(1+r,months))/(Math.pow(1+r,months)-1);
+}
+
+function amortize(P,annualRate,months,extra){
+  if(!P||!annualRate||!months)return{totalInterest:0,actualMonths:0};
+  const r=annualRate/100/12;
+  const basePmt=pmtCalc(P,annualRate,months);
+  let bal=P,totI=0,m=0;
+  while(bal>0.005&&m<months){
+    m++;
+    const ip=bal*r;
+    let pp=basePmt-ip+extra;
+    if(pp>bal)pp=bal;
+    bal=Math.max(0,bal-pp);
+    totI+=ip;
+  }
+  return{totalInterest:totI,actualMonths:m};
+}
+
+// Find the rate that, over the full original term with NO extra payments,
+// produces the same total interest as the accelerated payoff
+function findEffectiveRate(P,totalInterest,months){
+  if(!P||!totalInterest||!months)return 0;
+  let lo=0,hi=0.5;
+  for(let i=0;i<80;i++){
+    const mid=(lo+hi)/2;
+    const r=mid/12;
+    if(!r){lo=mid;continue}
+    const pmt=(P*r*Math.pow(1+r,months))/(Math.pow(1+r,months)-1);
+    const tI=pmt*months-P;
+    if(tI<totalInterest)lo=mid;else hi=mid;
+  }
+  return(lo+hi)/2;
+}
+
+function calcSide(prefix,hasDebt){
+  const A=num(prefix+'-amount'),M=num(prefix+'-months'),R=num(prefix+'-rate');
+  const tax=num(prefix+'-tax'),hoi=num(prefix+'-hoi'),extra=num(prefix+'-extra');
+  const debt=hasDebt?num(prefix+'-debt'):0;
+
+  let pmt=0;
+  if(A&&M&&R) pmt=pmtCalc(A,R,M);
+
+  $(prefix+'-payment').textContent=pmt?fmt(pmt):'—';
+
+  const total=pmt+tax+hoi+extra+debt;
+  $(prefix+'-total').textContent=total?fmt(total):'—';
+
+  // Effective rate
+  const effEl=$(prefix+'-eff-rate');
+  const effSub=$(prefix+'-eff-sub');
+  const effDetail=$(prefix+'-eff-detail');
+
+  if(A&&M&&R&&extra>0){
+    const stdAmort=amortize(A,R,M,0);
+    const extAmort=amortize(A,R,M,extra);
+    const intSaved=stdAmort.totalInterest-extAmort.totalInterest;
+    const moSaved=stdAmort.actualMonths-extAmort.actualMonths;
+    const effRate=findEffectiveRate(A,extAmort.totalInterest,M);
+
+    effEl.textContent=(effRate*100).toFixed(3)+'%';
+    const ey=Math.floor(extAmort.actualMonths/12),em=extAmort.actualMonths%12;
+    effSub.innerHTML=`Your <strong>${R}%</strong> rate with <strong>${fmt(extra)}/mo</strong> extra acts like a <strong>${(effRate*100).toFixed(3)}%</strong> rate`;
+    effDetail.style.display='flex';
+    $(prefix+'-eff-saved').textContent=fmt(intSaved);
+    $(prefix+'-eff-payoff').textContent=`${ey}yr ${em}mo`;
+    $(prefix+'-eff-mosaved').textContent=moSaved+' mo';
+  } else if(A&&M&&R){
+    effEl.textContent=R.toFixed(3)+'%';
+    effEl.className='eff-card-rate muted';
+    effSub.textContent='Add an extra payment to see the effective rate drop';
+    effDetail.style.display='none';
+  } else {
+    effEl.textContent='—';
+    effEl.className='eff-card-rate muted';
+    effSub.textContent='Enter loan details and an extra payment to see the effective rate';
+    effDetail.style.display='none';
+  }
+
+  // Restore color class when extra is active
+  if(A&&M&&R&&extra>0){
+    effEl.className='eff-card-rate '+(prefix==='l'?'left-color':'right-color');
+  }
+
+  return{pmt,total};
+}
+
+function calc(){
+  const left=calcSide('l',true);
+  const right=calcSide('r',false);
+
+  // Print values
+  ['l-amount','l-months','l-rate','l-tax','l-hoi','l-extra','l-debt',
+   'r-amount','r-months','r-rate','r-tax','r-hoi','r-extra'].forEach(id=>{
+    const el=$(id);
+    const pv=$(id+'-pv');
+    if(!el||!pv)return;
+    const v=el.value;
+    if(v){
+      if(id.includes('rate'))pv.textContent=v+'%';
+      else if(id.includes('months'))pv.textContent=v;
+      else pv.textContent=fmt(parseFloat(v)||0);
+    }else pv.textContent='';
+  });
+
+  // Difference
+  const diffEl=$('diff-val');
+  const diffSub=$('diff-sub');
+  if(left.total&&right.total){
+    const diff=left.total-right.total;
+    diffEl.textContent=(diff>=0?'+':'')+(diff>=0?fmt(diff):'-'+fmtN(diff));
+    diffEl.className='diff-value '+(diff>0?'pos':diff<0?'neg':'zero');
+    diffSub.textContent=diff>0?'Current loan costs more':diff<0?'New loan costs more':'Equal payments';
+  }else{
+    diffEl.textContent='—';
+    diffEl.className='diff-value zero';
+    diffSub.textContent='Current vs new';
+  }
+}
+
+calc();
+</script>
+</body>
+</html>
   .center-col {
     background: #f0f0f5;
     display: flex;
