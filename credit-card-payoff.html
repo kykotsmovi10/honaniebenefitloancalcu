@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Credit Card Payoff Calculator</title>
+<meta name="theme-color" content="#1e2b4d"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+:root{
+  --navy:#1e2b4d; --navy-deep:#172239; --navy-soft:#2b3652;
+  --gold:#c3a163;
+  --green:#6f7f2e; --green-text:#68762b; --green-deep:#3e4a1e; --green-bright:#a8c44a;
+  --callout:#eef3d8;
+  --red:#b03030; --red-soft:#e08a8a; --red-bg:#fdecea; --red-line:#e8b4b4;
+  --panel:#f1f4f9; --panel-line:#dee1e9; --border:#dfe4ee; --card:#fff;
+  --panel-dark:#141a26; --panel-dark-line:#2c3548; --panel-dark-muted:#9aa3b5;
+  --ink:#1e2b4d; --muted:#1a1a1a; --dim:#7d8699;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--panel);color:var(--ink);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;font-feature-settings:'tnum' 1}
+
+.bar{background:var(--navy);color:#fff;padding:22px 40px}
+.bar h1{font-size:23px;font-weight:700;letter-spacing:-.4px;line-height:1.2}
+.bar h1 span{color:var(--gold)}
+.bar .tag{display:block;font-size:12.5px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:2px;margin-top:4px}
+
+.wrap{max-width:1080px;margin:0 auto;padding:24px 24px 60px}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 2px 8px rgba(30,43,77,.07);overflow:hidden;margin-bottom:20px}
+.cardhdr{background:var(--navy);color:#fff;padding:15px 22px;font-size:17px;font-weight:700;letter-spacing:-.3px}
+.cardhdr span{color:var(--gold);font-weight:600}
+.cardbody{padding:22px 24px}
+
+/* ── CARD ROWS ── */
+.chead{display:flex;gap:10px;padding:0 0 8px;font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.8px}
+.chead .c-name{flex:2 1 150px}.chead .c-num{flex:1 1 110px;text-align:right}
+.chead .c-out{flex:1 1 120px;text-align:right}.chead .c-x{width:30px}
+.crow{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--panel-line);flex-wrap:wrap}
+.crow .f-name{flex:2 1 150px}
+.crow .f-num{flex:1 1 110px}
+.crow .f-out{flex:1 1 120px;text-align:right;font-weight:700;font-size:14px}
+.inpwrap{display:flex;align-items:center;border:1.5px solid var(--border);background:var(--card);border-radius:8px;padding:0 10px;min-width:0;transition:border-color .15s,box-shadow .15s}
+.inpwrap:focus-within{border-color:var(--navy);box-shadow:0 0 0 3px rgba(30,43,77,.08)}
+.inpwrap .pre,.inpwrap .suf{color:var(--dim);font-size:13px;font-weight:500}
+.inpwrap .pre{padding-right:4px}.inpwrap .suf{padding-left:4px}
+.inpwrap input{border:none;outline:none;background:transparent;font-size:14.5px;font-weight:600;font-family:inherit;color:var(--ink);padding:8px 0;width:100%;min-width:0;text-align:right}
+.inpwrap input.txt{text-align:left;font-weight:600}
+.inpwrap input::placeholder{color:var(--dim);font-weight:500}
+.xbtn{width:30px;height:30px;border:none;background:none;color:var(--dim);font-size:19px;cursor:pointer;border-radius:6px;flex-shrink:0;line-height:1}
+.xbtn:hover{color:var(--red);background:var(--red-bg)}
+.addbtn{margin-top:14px;background:var(--card);border:1.5px dashed var(--border);border-radius:8px;padding:11px 22px;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .18s}
+.addbtn:hover{border-color:var(--navy);color:var(--navy)}
+.warn{font-size:12px;color:var(--red);font-weight:600;margin-top:8px}
+
+/* ── TOTALS STRIP ── */
+.totals{display:flex;flex-wrap:wrap;gap:22px;margin-top:18px;padding:18px 20px;background:var(--panel);border-radius:8px}
+.tot{flex:1 1 140px}
+.tot .k{font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.7px}
+.tot .v{font-size:22px;font-weight:800;color:var(--navy);letter-spacing:-.7px;margin-top:3px}
+.tot .v.red{color:var(--red)}
+
+/* ── DARK HEADLINE ── */
+.dark{background:var(--panel-dark);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.dark .inner{padding:24px 28px}
+.dark .lbl{font-size:12px;font-weight:600;color:var(--panel-dark-muted);text-transform:uppercase;letter-spacing:1.6px}
+.dark .big{font-size:46px;font-weight:800;color:var(--red-soft);letter-spacing:-2px;line-height:1.1;margin-top:2px}
+.dark .sub{font-size:13.5px;color:var(--panel-dark-muted);margin-top:6px;line-height:1.55}
+.drows{margin-top:16px}
+.drow{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:12px 0;border-top:1px solid var(--panel-dark-line);font-size:14px}
+.drow .k{color:var(--panel-dark-muted);font-weight:500}
+.drow .v{color:#fff;font-weight:600;white-space:nowrap}
+.drow.tot .k{color:#fff;font-weight:700;font-size:15px}
+.drow.tot .v{font-weight:700;font-size:17px;color:var(--red-soft)}
+
+/* ── TABLES ── */
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{background:var(--panel);color:var(--dim);padding:11px 13px;text-align:right;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border)}
+.tbl th:first-child{text-align:left}
+.tbl td{padding:11px 13px;text-align:right;border-bottom:1px solid #eef1f6;letter-spacing:-.2px;font-weight:600}
+.tbl td:first-child{text-align:left;color:var(--muted)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr.now td{background:var(--callout)}
+.tbl .bad{color:var(--red)}
+.tbl .save{color:var(--green-text)}
+.tbl .quiet{color:var(--dim);font-weight:500}
+
+/* ── SPLIT BAR ── */
+.splitbar{display:flex;height:38px;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.splitbar div{display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600}
+.splitlegend{display:flex;gap:22px;margin-top:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.splitlegend .sw{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:7px}
+
+/* ── CALLOUTS ── */
+.band{background:var(--callout);border:1px solid #d6e2ac;border-radius:8px;padding:16px 18px;margin-bottom:18px}
+.band .k{font-size:11px;font-weight:700;color:var(--green-deep);text-transform:uppercase;letter-spacing:1px}
+.band .v{font-size:28px;font-weight:800;color:var(--green-deep);letter-spacing:-1px;margin-top:3px}
+.band .s{font-size:12.5px;color:var(--green-deep);opacity:.85;margin-top:5px;line-height:1.55}
+.band.alert{background:var(--red-bg);border-color:var(--red-line)}
+.band.alert .k,.band.alert .v,.band.alert .s{color:#8a1f1a}
+
+.para{font-size:13.5px;color:var(--muted);line-height:1.7;margin-top:16px}
+.para strong{font-weight:700}
+
+.ctl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.ctl label{font-size:13px;font-weight:600;color:var(--muted)}
+.ctl .inpwrap{max-width:160px}
+
+.note{font-size:12.5px;color:var(--dim);margin-top:8px;line-height:1.65;border-top:1px solid var(--border);padding-top:16px}
+
+@media print{.no-print{display:none!important}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}}
+@media(max-width:760px){
+  .bar{padding:18px 20px}.wrap{padding:16px 14px 40px}
+  .chead{display:none}
+  .crow{border-top:1px solid var(--border);padding:14px 0;gap:8px}
+  .crow .f-name{flex:1 1 100%}.crow .f-num{flex:1 1 calc(50% - 20px)}
+  .crow .f-out{flex:1 1 100%;text-align:left}
+  .dark .big{font-size:36px}
+  .tbl{font-size:13px}.tbl td,.tbl th{padding:9px 8px}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState, useMemo} = React;
+
+const money = v => v==null||!isFinite(v) ? "$0.00"
+  : new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",minimumFractionDigits:2}).format(v);
+const money0 = v => v==null||!isFinite(v) ? "$0"
+  : new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(v);
+const yrmo = m => {
+  if(m==null) return "—";
+  const y=Math.floor(m/12), mm=m%12;
+  if(y===0) return mm+(mm===1?" month":" months");
+  if(mm===0) return y+(y===1?" year":" years");
+  return y+"y "+mm+"m";
+};
+const payoffDate = m => {
+  if(m==null) return "—";
+  const d=new Date(); d.setMonth(d.getMonth()+m);
+  return d.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+};
+
+const CAP = 1200;   // 100 years — past this we call it never
+
+/* Declining minimum for ONE card: the payment is recalculated each month as
+   (percent of balance) + (that month's interest), floored at a dollar amount.
+   The payment shrinks as the balance falls — which is why this takes so long. */
+function payoffCard(balance, apr, pct, floor){
+  if(!(balance>0) || !(apr>=0)) return null;
+  const r = apr/100/12;
+  let bal=balance, ti=0, m=0, first=null, firstInt=null;
+  while(bal>0.005 && m<CAP){
+    const i = bal*r;
+    let pay = Math.max(pct*bal + i, floor);
+    if(pay >= bal+i) pay = bal+i;
+    const pr = pay - i;
+    if(pr <= 0.000001) return {never:true, first:pay, firstInt:i};
+    if(first===null){ first=pay; firstInt=i; }
+    bal -= pr; if(bal<0.005) bal=0;
+    ti += i; m++;
+  }
+  if(m>=CAP) return {never:true, first, firstInt};
+  return {months:m, interest:ti, first, firstInt, totalPaid:balance+ti};
+}
+
+/* Fixed payment until gone. */
+function payoffFixed(balance, apr, payment){
+  if(!(balance>0)||!(payment>0)) return null;
+  const r=apr/100/12;
+  let bal=balance, ti=0, m=0;
+  while(bal>0.005 && m<CAP){
+    const i=bal*r;
+    if(payment <= i+0.000001) return {never:true};
+    const pr=Math.min(payment-i, bal);
+    bal-=pr; if(bal<0.005) bal=0;
+    ti+=i; m++;
+  }
+  if(m>=CAP) return {never:true};
+  return {months:m, interest:ti, totalPaid:balance+ti};
+}
+
+/* Run one card forward N months of minimum-only payments and report where it lands. */
+function fastForward(balance, apr, pct, floor, months){
+  const r=apr/100/12;
+  let bal=balance, paid=0, ti=0;
+  for(let k=0;k<months;k++){
+    if(bal<=0.005){ bal=0; break; }
+    const i=bal*r;
+    let pay=Math.max(pct*bal+i, floor);
+    if(pay>=bal+i) pay=bal+i;
+    const pr=pay-i;
+    if(pr<=0){ bal += i - pay; paid+=pay; ti+=i; continue; }  // balance growing
+    bal-=pr; paid+=pay; ti+=i;
+  }
+  return {balance:Math.max(0,bal), paid, interest:ti};
+}
+
+let uid = 100;
+const newCard = () => ({id:++uid, name:"", bal:"", apr:""});
+
+function App(){
+  const [cards,setCards] = useState([
+    {id:1, name:"Visa",       bal:"4,665",  apr:"22.99"},
+    {id:2, name:"Mastercard", bal:"10,200", apr:"26.99"},
+    {id:3, name:"Store card", bal:"1,850",  apr:"29.99"},
+  ]);
+  const [pct,setPct]     = useState("1");
+  const [floor,setFloor] = useState("35");
+  const [waitMo,setWait] = useState("24");
+  const [newPmt,setNewPmt] = useState("");
+
+  const n = s => { const v=parseFloat(String(s).replace(/[$,%\s]/g,"")); return isFinite(v)?v:0; };
+  const PCT=n(pct)/100, FLOOR=n(floor);
+
+  const upd = (id,k,v) => setCards(cs=>cs.map(c=>c.id===id?{...c,[k]:v}:c));
+  const add = () => setCards(cs=>[...cs, newCard()]);
+  const rm  = id => setCards(cs=>cs.filter(c=>c.id!==id));
+
+  const R = useMemo(()=>{
+    const rows = cards.map(c=>{
+      const b=n(c.bal), a=n(c.apr);
+      const res = (b>0 && a>=0) ? payoffCard(b,a,PCT,FLOOR) : null;
+      return {...c, b, a, res};
+    });
+    const live = rows.filter(r=>r.res && !r.res.never);
+    const broken = rows.filter(r=>r.res && r.res.never);
+
+    const totalBal   = rows.reduce((s,r)=>s+r.b,0);
+    const totalMin   = live.reduce((s,r)=>s+r.res.first,0)
+                     + broken.reduce((s,r)=>s+(r.res.first||0),0);
+    const totalInt   = live.reduce((s,r)=>s+r.res.interest,0);
+    const longest    = live.length ? Math.max(...live.map(r=>r.res.months)) : null;
+    const totalPaid  = totalBal + totalInt;
+
+    // Cost of waiting: run every card forward and see where things stand.
+    const waits = [0,6,12,24,36,60].map(w=>{
+      let bal=0, paid=0, ti=0;
+      live.forEach(r=>{
+        const f=fastForward(r.b, r.a, PCT, FLOOR, w);
+        bal+=f.balance; paid+=f.paid; ti+=f.interest;
+      });
+      return {w, bal, paid, interest:ti, principalGone: totalBal-bal};
+    });
+
+    // If they consolidated instead, at a payment they choose
+    const NP = n(newPmt);
+    const consolidated = (NP>0 && totalBal>0) ? null : null;
+
+    return {rows, live, broken, totalBal, totalMin, totalInt, totalPaid, longest, waits};
+  },[cards,PCT,FLOOR,newPmt]);
+
+  const wait = R.waits.find(w=>w.w===Math.round(n(waitMo))) || R.waits[3];
+  const has = R.live.length>0;
+
+  return(
+  <div>
+    <header className="bar">
+      <h1>Credit Card <span>Payoff Calculator</span></h1>
+      <span className="tag">What minimum payments really cost</span>
+    </header>
+
+    <div className="wrap">
+
+      {/* ── CARDS ── */}
+      <div className="card">
+        <div className="cardhdr">Their cards <span>— add every balance from the credit report</span></div>
+        <div className="cardbody">
+          <div className="chead">
+            <span className="c-name">Card</span>
+            <span className="c-num">Balance</span>
+            <span className="c-num">APR</span>
+            <span className="c-out">Min payment</span>
+            <span className="c-out">Payoff</span>
+            <span className="c-x"></span>
+          </div>
+
+          {R.rows.map((c,i)=>(
+            <div className="crow" key={c.id}>
+              <div className="f-name">
+                <div className="inpwrap"><input className="txt" value={c.name} placeholder={"Card "+(i+1)}
+                  onChange={e=>upd(c.id,'name',e.target.value)} aria-label="Card name"/></div>
+              </div>
+              <div className="f-num">
+                <div className="inpwrap"><span className="pre">$</span>
+                  <input value={c.bal} inputMode="decimal" placeholder="0"
+                    onChange={e=>upd(c.id,'bal',e.target.value)} aria-label="Balance"/></div>
+              </div>
+              <div className="f-num">
+                <div className="inpwrap">
+                  <input value={c.apr} inputMode="decimal" placeholder="0.00"
+                    onChange={e=>upd(c.id,'apr',e.target.value)} aria-label="APR"/>
+                  <span className="suf">%</span></div>
+              </div>
+              <div className="f-out">{c.res && c.res.first ? money(c.res.first) : "—"}</div>
+              <div className="f-out" style={{color: c.res && c.res.never ? 'var(--red)' : 'var(--navy)'}}>
+                {!c.res ? "—" : c.res.never ? "Never" : yrmo(c.res.months)}
+              </div>
+              <button className="xbtn no-print" onClick={()=>rm(c.id)}
+                      title="Remove card" aria-label="Remove card">×</button>
+            </div>
+          ))}
+
+          <button className="addbtn no-print" onClick={add}>+ Add another card</button>
+
+          {R.broken.length>0 && <div className="warn">
+            {R.broken.length===1 ? "One card's" : R.broken.length+" cards'"} minimum payment never covers
+            the interest — that balance grows instead of shrinking, so it's excluded from the totals below.
+          </div>}
+
+          <div className="totals">
+            <div className="tot"><div className="k">Cards</div><div className="v">{R.rows.filter(r=>r.b>0).length}</div></div>
+            <div className="tot"><div className="k">Total balance</div><div className="v">{money0(R.totalBal)}</div></div>
+            <div className="tot"><div className="k">Total minimums</div><div className="v">{money0(R.totalMin)}<span style={{fontSize:13,fontWeight:500,color:'var(--dim)'}}>/mo</span></div></div>
+            <div className="tot"><div className="k">Total interest</div><div className="v red">{money0(R.totalInt)}</div></div>
+          </div>
+        </div>
+      </div>
+
+      {has && <>
+
+        {/* ── HEADLINE ── */}
+        <div className="dark">
+          <div className="inner">
+            <div className="lbl">Paying only the minimums</div>
+            <div className="big">{yrmo(R.longest)}</div>
+            <div className="sub">
+              Last card clears {payoffDate(R.longest)}. Starting payments total {money(R.totalMin)} a month
+              across {R.rows.filter(r=>r.b>0).length} cards.
+            </div>
+            <div className="drows">
+              <div className="drow"><span className="k">Total balance today</span><span className="v">{money(R.totalBal)}</span></div>
+              <div className="drow"><span className="k">Total they'd repay</span><span className="v">{money(R.totalPaid)}</span></div>
+              <div className="drow tot"><span className="k">Interest alone</span><span className="v">{money(R.totalInt)}</span></div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── WHERE THE MONEY GOES ── */}
+        <div className="card">
+          <div className="cardhdr">Where the money goes <span>— balance vs interest</span></div>
+          <div className="cardbody">
+            <div className="splitbar">
+              <div style={{width:(R.totalBal/R.totalPaid*100)+'%',background:'#1e2b4d'}}>
+                {(R.totalBal/R.totalPaid)>0.13 && Math.round(R.totalBal/R.totalPaid*100)+'%'}
+              </div>
+              <div style={{width:(R.totalInt/R.totalPaid*100)+'%',background:'#b03030'}}>
+                {(R.totalInt/R.totalPaid)>0.13 && Math.round(R.totalInt/R.totalPaid*100)+'%'}
+              </div>
+            </div>
+            <div className="splitlegend">
+              <span><span className="sw" style={{background:'#1e2b4d'}}></span>What they borrowed {money(R.totalBal)}</span>
+              <span><span className="sw" style={{background:'#b03030'}}></span>Interest {money(R.totalInt)}</span>
+            </div>
+            <p className="para">
+              On {money(R.totalBal)} of balances, minimum payments would cost <strong>{money(R.totalInt)}</strong> in
+              interest{R.totalInt > R.totalBal && <> — <strong>{(R.totalInt/R.totalBal).toFixed(1)}× what they actually borrowed</strong></>}.
+              They'd hand over {money(R.totalPaid)} in total and the last card wouldn't clear until {payoffDate(R.longest)}.
+            </p>
+          </div>
+        </div>
+
+        {/* ── COST OF WAITING ── */}
+        <div className="card">
+          <div className="cardhdr">The cost of waiting <span>— what happens if they do nothing</span></div>
+          <div className="cardbody">
+
+            <div className="band alert">
+              <div className="k">If they wait {wait.w} months</div>
+              <div className="v">{money0(wait.paid)} paid, balance down only {money0(wait.principalGone)}</div>
+              <div className="s">
+                Of the {money(wait.paid)} they'd pay over those {wait.w} months,
+                <strong> {money(wait.interest)} goes to interest</strong> — {Math.round(wait.interest/wait.paid*100)}% of
+                every dollar. They'd still owe {money(wait.bal)}.
+              </div>
+            </div>
+
+            <table className="tbl">
+              <thead><tr>
+                <th>If they wait</th>
+                <th>They'll have paid</th>
+                <th>Of that, interest</th>
+                <th>Balance still owed</th>
+                <th>Principal actually gone</th>
+              </tr></thead>
+              <tbody>
+                {R.waits.map(w=>(
+                  <tr key={w.w} className={w.w===0?'now':''}>
+                    <td>{w.w===0 ? 'Today' : w.w+' months'}</td>
+                    <td className={w.w===0?'quiet':''}>{w.w===0?'—':money(w.paid)}</td>
+                    <td className={w.w===0?'quiet':'bad'}>{w.w===0?'—':money(w.interest)}</td>
+                    <td>{money(w.bal)}</td>
+                    <td className={w.w===0?'quiet':'save'}>{w.w===0?'—':money(w.principalGone)}</td>
+                  </tr>))}
+              </tbody>
+            </table>
+
+            <p className="para">
+              This assumes nothing goes wrong — no new charges, no missed payments, no rate increases.
+              Every month they wait, the money still leaves their account; it just goes to interest
+              instead of to the balance.
+            </p>
+          </div>
+        </div>
+
+        {/* ── FORMULA ── */}
+        <div className="card">
+          <div className="cardhdr">Minimum payment formula <span>— adjust if you know the issuer's terms</span></div>
+          <div className="cardbody">
+            <div className="ctl">
+              <label>Percent of balance</label>
+              <div className="inpwrap"><input value={pct} inputMode="decimal"
+                onChange={e=>setPct(e.target.value)} aria-label="Percent of balance"/><span className="suf">%</span></div>
+              <label style={{marginLeft:10}}>Dollar floor</label>
+              <div className="inpwrap"><span className="pre">$</span><input value={floor} inputMode="decimal"
+                onChange={e=>setFloor(e.target.value)} aria-label="Dollar floor"/></div>
+              <label style={{marginLeft:10}}>Wait scenario</label>
+              <div className="inpwrap"><input value={waitMo} inputMode="numeric"
+                onChange={e=>setWait(e.target.value)} aria-label="Wait months"/><span className="suf">mo</span></div>
+            </div>
+            <p className="para" style={{marginTop:4}}>
+              Each month the minimum is recalculated as this percent of the balance plus that month's interest,
+              or the dollar floor — whichever is greater. Because the payment shrinks as the balance falls,
+              minimum-only payoff drags on far longer than paying a steady amount.
+            </p>
+          </div>
+        </div>
+      </>}
+
+      {!has && <div className="card"><div className="cardbody">
+        <p className="para" style={{marginTop:0}}>Add at least one card with a balance and an APR to see the picture.</p>
+      </div></div>}
+
+      <p className="note">
+        Minimum payments are modeled as a percent of the balance plus that month's interest, subject to a dollar
+        floor — the structure most issuers use. Assumes fixed APRs, no new purchases, no fees, and no missed
+        payments; real outcomes are usually worse. Estimates for illustration only, not a loan commitment or
+        financial advice.
+      </p>
+    </div>
+  </div>);
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
