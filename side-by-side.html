@@ -41,7 +41,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--panel);
     color: var(--ink);
     min-height: 100vh;
@@ -52,37 +52,19 @@
   /* ── HEADER ── */
   .site-header {
     background: var(--navy);
-    padding: 20px 40px;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 16px; flex-wrap: wrap;
+    padding: 22px 40px;
   }
   .site-header h1 {
-    font-size: 1.45rem; font-weight: 700;
-    color: var(--white); letter-spacing: -0.01em;
+    font-size: 23px; font-weight: 700;
+    color: var(--white); letter-spacing: -0.4px;
   }
   .site-header h1 span { color: var(--gold); }
   .header-sub {
-    font-size: 0.72rem; font-weight: 600; color: var(--gold);
-    text-transform: uppercase; letter-spacing: 0.16em; margin-top: 4px;
+    font-size: 12.5px; font-weight: 600; color: var(--gold);
+    text-transform: uppercase; letter-spacing: 2px; margin-top: 4px;
   }
-  .header-btns { display: flex; gap: 10px; align-items: center; }
-  .btn {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 10px 20px; border-radius: 8px; border: none;
-    font-family: inherit; font-size: 0.8rem; font-weight: 600;
-    cursor: pointer; transition: all 0.18s ease;
-  }
-  .btn-present { background: var(--gold); color: var(--navy); }
-  .btn-present:hover { filter: brightness(1.08); }
-  .btn-print { background: rgba(255,255,255,0.12); color: var(--white); }
-  .btn-print:hover { background: rgba(255,255,255,0.2); }
-  .btn-edit {
-    background: transparent; color: var(--white);
-    border: 1.5px solid rgba(255,255,255,0.35); display: none;
-  }
-  .btn-edit:hover { border-color: var(--white); background: rgba(255,255,255,0.08); }
-  .btn-icon { font-size: 0.95rem; }
-  .btn:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
   .page { max-width: 1280px; margin: 0 auto; padding: 24px 24px 60px; }
 
@@ -97,20 +79,20 @@
   .summary-item { text-align: center; }
   .summary-item + .summary-item { border-left: 1px solid var(--panel-dark-line); }
   .summary-label {
-    font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase;
+    font-size: 12px; letter-spacing: 1.6px; text-transform: uppercase;
     color: var(--panel-dark-muted); margin-bottom: 6px; font-weight: 600;
   }
   .summary-value {
-    font-size: 1.7rem; font-weight: 800;
-    color: var(--green-bright); letter-spacing: -0.03em;
+    font-size: 34px; font-weight: 800;
+    color: var(--green-bright); letter-spacing: -1.2px; line-height: 1.1;
   }
   .summary-value.green { color: var(--green-bright); }
 
   /* ── TOOL TITLE ── */
   .tool-title {
     background: var(--navy); color: var(--white);
-    padding: 15px 24px; font-size: 1.05rem; font-weight: 700;
-    letter-spacing: -0.01em; border-radius: 10px 10px 0 0;
+    padding: 16px 24px; font-size: 17px; font-weight: 700;
+    letter-spacing: -0.3px; border-radius: 10px 10px 0 0;
   }
   .tool-title span { color: var(--gold); font-weight: 600; }
 
@@ -126,8 +108,8 @@
   .panel-blue { background: var(--card); }
 
   .panel-header {
-    font-size: 0.78rem; font-weight: 700; color: var(--dim);
-    letter-spacing: 0.12em; text-transform: uppercase;
+    font-size: 11px; font-weight: 700; color: var(--dim);
+    letter-spacing: 1px; text-transform: uppercase;
     margin-bottom: 18px; padding-bottom: 10px;
     border-bottom: 1px solid var(--border);
   }
@@ -137,19 +119,19 @@
     margin-bottom: 10px; min-height: 36px; gap: 12px;
   }
   .field-label {
-    font-size: 0.82rem; color: var(--muted); font-weight: 500;
-    flex: 1; line-height: 1.35;
+    font-size: 13px; color: var(--muted); font-weight: 600;
+    letter-spacing: -0.1px; flex: 1; line-height: 1.4;
   }
   .field-value {
-    font-size: 0.92rem; font-weight: 700; color: var(--navy);
-    min-width: 130px; text-align: right;
+    font-size: 15px; font-weight: 700; color: var(--navy);
+    letter-spacing: -0.2px; min-width: 130px; text-align: right;
   }
   .field-value.calc { color: var(--navy); }
   .field-value.saved { color: var(--green-text); }
 
   .term-inputs { display: flex; gap: 6px; align-items: center; }
   .term-inputs input { width: 62px; }
-  .term-unit { font-size: 0.74rem; color: var(--dim); white-space: nowrap; }
+  .term-unit { font-size: 12px; color: var(--dim); white-space: nowrap; }
 
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -158,7 +140,7 @@
   input[type="number"], input[type="text"] {
     background: var(--card); border: 1.5px solid var(--border);
     border-radius: 8px; color: var(--ink);
-    font-size: 0.9rem; font-weight: 600; font-family: inherit;
+    font-size: 15px; font-weight: 600; font-family: inherit;
     padding: 8px 11px; width: 140px; text-align: right;
     transition: border-color 0.15s, box-shadow 0.15s; outline: none;
   }
@@ -175,20 +157,20 @@
   }
   .milestone-header {
     background: var(--navy); color: var(--white);
-    padding: 15px 24px; font-size: 1rem; font-weight: 700; letter-spacing: -0.01em;
+    padding: 16px 24px; font-size: 17px; font-weight: 700; letter-spacing: -0.3px;
   }
-  .milestone-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .milestone-table { width: 100%; border-collapse: collapse; font-size: 14px; }
   .milestone-table thead tr { background: var(--panel); }
   .milestone-table th {
     padding: 11px 16px; text-align: center;
-    font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+    font-size: 11px; letter-spacing: 0.8px; text-transform: uppercase;
     color: var(--dim); font-weight: 600; border-bottom: 1px solid var(--border);
   }
   .milestone-table th.orange-col { color: var(--dim); }
   .milestone-table th.blue-col { color: var(--navy); }
   .milestone-table td {
     padding: 11px 16px; text-align: center;
-    font-size: 0.88rem; border-bottom: 1px solid #eef1f6;
+    font-size: 14px; letter-spacing: -0.2px; border-bottom: 1px solid #eef1f6;
   }
   .milestone-table tbody tr:nth-child(even) { background: var(--panel); }
   .milestone-table tbody tr:hover { background: #e9eef7; }
@@ -205,28 +187,24 @@
   }
   .chart-card-header {
     background: var(--navy); color: var(--white);
-    padding: 13px 20px; font-size: 0.82rem; font-weight: 700;
+    padding: 14px 20px; font-size: 14px; font-weight: 700; letter-spacing: -0.2px;
   }
   .chart-body { padding: 20px; }
   canvas { display: block; width: 100%; }
 
   /* ── PRINT ── */
   @media print {
-    .no-print, .header-btns, input { display: none !important; }
+    .no-print, input { display: none !important; }
     body { background: white; }
     .page { padding: 10px; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     .site-header { padding: 12px 20px; }
     .comparison-grid { page-break-inside: avoid; }
   }
-  .print-mode input { display: none !important; }
-  .print-mode .field-value-print { display: inline !important; }
   .field-value-print {
-    display: none; font-size: 0.92rem; font-weight: 700;
+    display: none; font-size: 15px; font-weight: 700;
     color: var(--navy); min-width: 130px; text-align: right;
   }
-  .print-mode .btn-print { display: none; }
-  .print-mode .btn-edit { display: inline-flex; }
 
   @media (max-width: 900px) {
     .comparison-grid { grid-template-columns: 1fr; }
@@ -249,34 +227,7 @@
     <h1>Mortgage <span>Side by Side</span></h1>
     <div class="header-sub">Loan Comparison</div>
   </div>
-  <div class="header-btns no-print">
-    <button class="btn btn-present" onclick="openPresentModal()">Present to client</button>
-    <button class="btn btn-print" onclick="enterPrintMode()">Print / email ready</button>
-    <button class="btn btn-edit" onclick="exitPrintMode()">Back to edit mode</button>
-  </div>
 </header>
-
-<!-- PRESENTATION MODAL -->
-<div id="presentModal" style="display:none;position:fixed;inset:0;background:rgba(23,34,57,0.82);z-index:9999;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:#fff;border-radius:14px;padding:38px 42px;max-width:470px;width:100%;box-shadow:0 20px 60px rgba(23,34,57,0.4);text-align:center;font-family:'Inter',Arial,sans-serif;">
-    <h2 style="font-size:1.3rem;font-weight:700;color:#1e2b4d;margin-bottom:8px;letter-spacing:-0.01em;">New loan presentation</h2>
-    <p style="font-size:0.85rem;color:#1a1a1a;margin-bottom:26px;line-height:1.6;">Choose how to share this comparison with your client.</p>
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      <button onclick="downloadPresentation()" style="padding:14px 18px;background:#1e2b4d;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:0.9rem;font-weight:600;text-align:left;">
-        Download for email<br><span style="font-size:0.76rem;opacity:0.72;font-weight:400;">Saves New_Loan_Presentation.html to attach</span>
-      </button>
-      <button onclick="previewPresentation()" style="padding:14px 18px;background:#2b3652;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:0.9rem;font-weight:600;text-align:left;">
-        Preview<br><span style="font-size:0.76rem;opacity:0.72;font-weight:400;">Opens in a new tab before sending</span>
-      </button>
-      <button onclick="saveAsPDF()" style="padding:14px 18px;background:#6f7f2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:0.9rem;font-weight:600;text-align:left;">
-        Save as PDF<br><span style="font-size:0.76rem;opacity:0.72;font-weight:400;">Opens your browser's print dialog</span>
-      </button>
-      <button onclick="closePresentModal()" style="padding:12px 18px;background:transparent;color:#1a1a1a;border:1.5px solid #dfe4ee;border-radius:8px;cursor:pointer;font-family:inherit;font-size:0.88rem;font-weight:600;text-align:left;">
-        Back<br><span style="font-size:0.76rem;color:#7d8699;font-weight:400;">Close and return to the calculator</span>
-      </button>
-    </div>
-  </div>
-</div>
 
 <div class="page">
 
@@ -301,7 +252,7 @@
       <div class="panel-header">Original loan</div>
 
       <div class="field-row">
-        <span class="field-label">Principal (original balance)</span>
+        <span class="field-label">Principal (current loan balance)</span>
         <span>
           <input type="number" id="orig-principal" placeholder="$0.00" oninput="calc()">
           <span class="field-value-print" id="orig-principal-print"></span>
@@ -459,14 +410,14 @@
       <div class="chart-card-header">Cost breakdown — principal vs interest vs savings</div>
       <div class="chart-body">
         <canvas id="costChart" height="220"></canvas>
-        <div id="costLegend" style="margin-top:14px;font-size:0.78rem;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;color:var(--muted);"></div>
+        <div id="costLegend" style="margin-top:14px;font-size:12.5px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;color:var(--muted);"></div>
       </div>
     </div>
     <div class="chart-card">
       <div class="chart-card-header">Balance over time — standard vs accelerated payoff</div>
       <div class="chart-body">
         <canvas id="balanceChart" height="220"></canvas>
-        <div id="balanceLegend" style="margin-top:10px;font-size:0.78rem;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;color:var(--muted);"></div>
+        <div id="balanceLegend" style="margin-top:10px;font-size:12.5px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;color:var(--muted);"></div>
       </div>
     </div>
   </div>
@@ -804,263 +755,6 @@ function drawBalanceChart() {
     lastNewResult ? `<span style="display:flex;align-items:center;gap:5px;"><span style="width:20px;height:3px;background:#1e2b4d;display:inline-block;"></span> New loan (with extra)</span>` : ''
   ].join('');
 }
-
-// ────────────────────────────────────────────────
-//  PRESENTATION MODAL
-// ────────────────────────────────────────────────
-function openPresentModal() {
-  document.getElementById('presentModal').style.display = 'flex';
-}
-function closePresentModal() {
-  document.getElementById('presentModal').style.display = 'none';
-}
-
-function buildPresentationHTML() {
-  const C1 = '#1e2b4d';       // navy
-  const C2 = '#2b3652';       // navy-soft
-  const GOLD = '#c3a163';
-  const GREEN = '#6f7f2e';
-  const GREEN_DEEP = '#3e4a1e';
-  const CALLOUT = '#eef3d8';
-  const WHITE = '#ffffff';
-  const LIGHT = '#f1f4f9';
-  const MUTED = '#7d8699';
-  const BORDER = '#dfe4ee';
-
-  const oP  = document.getElementById('orig-principal').value;
-  const oR  = document.getElementById('orig-rate').value;
-  const oTY = document.getElementById('orig-term-yrs').value;
-  const oTM = document.getElementById('orig-term-mo').value;
-  const oTax= document.getElementById('orig-tax').value;
-  const oHOI= document.getElementById('orig-hoi').value;
-
-  const nP  = document.getElementById('new-principal').value;
-  const nR  = document.getElementById('new-rate').value;
-  const nTY = document.getElementById('new-term-yrs').value;
-  const nTM = document.getElementById('new-term-mo').value;
-  const nTax= document.getElementById('new-tax').value;
-  const nHOI= document.getElementById('new-hoi').value;
-  const nE  = document.getElementById('new-extra').value;
-
-  const origPmt   = document.getElementById('orig-payment').textContent;
-  const origTotal = document.getElementById('orig-total-monthly').textContent;
-  const origYrs   = document.getElementById('orig-years').textContent;
-  const origInt   = document.getElementById('orig-total-interest').textContent;
-
-  const newBase   = document.getElementById('new-base-payment').textContent;
-  const newAllIn  = document.getElementById('new-total-monthly').textContent;
-  const newYrs    = document.getElementById('new-years').textContent;
-  const timeSaved = document.getElementById('new-time-saved').textContent;
-  const pmtSaved  = document.getElementById('new-payments-saved').textContent;
-  const sumTime   = document.getElementById('sum-time-saved').textContent;
-  const sumInt    = document.getElementById('sum-interest-saved').textContent;
-
-  const fmtD = v => v ? '$'+parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:2}) : '$0.00';
-  const termStr = (y,m) => y ? y+' yrs'+(parseInt(m)>0?' '+m+' mo':'') : '—';
-
-  const rows = document.querySelectorAll('#milestone-body tr');
-  let milestoneRows = '';
-  rows.forEach((r,i) => {
-    const cells = r.querySelectorAll('td');
-    if (cells.length >= 5) {
-      const bg = i%2===0 ? WHITE : LIGHT;
-      const diffText = cells[3].textContent.trim();
-      const intText  = cells[4].textContent.trim();
-      const diffColor = diffText.startsWith('+') ? GREEN : diffText.startsWith('-') ? '#b03030' : MUTED;
-      const intColor  = intText.startsWith('$') && intText !== '$0.00' ? GREEN : MUTED;
-      milestoneRows += `<tr style="background:${bg};">
-        <td style="padding:6px 10px;text-align:center;font-weight:700;color:${C1};font-size:0.8rem;">${cells[0].textContent}</td>
-        <td style="padding:6px 10px;text-align:center;color:${MUTED};font-size:0.8rem;">${cells[1].textContent}</td>
-        <td style="padding:6px 10px;text-align:center;color:${C1};font-weight:700;font-size:0.8rem;">${cells[2].textContent}</td>
-        <td style="padding:6px 10px;text-align:center;font-size:0.8rem;font-weight:700;color:${diffColor};">${diffText}</td>
-        <td style="padding:6px 10px;text-align:center;font-size:0.8rem;font-weight:700;color:${intColor};">${intText}</td>
-      </tr>`;
-    }
-  });
-
-  const row = (label, val, color=C1) =>
-    `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #dee1e9;">
-      <span style="font-size:0.76rem;color:#1a1a1a;">${label}</span>
-      <span style="font-size:0.8rem;font-weight:700;color:${color};">${val}</span>
-    </div>`;
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Loan Comparison — ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{
-    font-family:'Inter','Helvetica Neue',Arial,sans-serif;
-    background:${WHITE};color:${C1};
-    padding:18px 22px;font-size:13px;line-height:1.45;
-    font-feature-settings:'tnum' 1;
-  }
-  .hd{
-    display:flex;align-items:center;justify-content:space-between;
-    background:${C1};color:${WHITE};
-    padding:14px 20px;border-radius:8px;margin-bottom:12px;
-  }
-  .hd-title{font-size:1.05rem;font-weight:700;letter-spacing:-0.01em;}
-  .hd-title span{color:${GOLD};}
-  .hd-sub{font-size:0.66rem;color:${GOLD};text-align:right;line-height:1.6;text-transform:uppercase;letter-spacing:0.14em;font-weight:600;}
-
-  .banner{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
-  .bcard{
-    background:${CALLOUT};border:1px solid #d6e2ac;border-radius:8px;padding:12px 18px;
-  }
-  .bcard-label{font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:${GREEN_DEEP};font-weight:600;}
-  .bcard-val{font-size:1.3rem;font-weight:800;color:${GREEN_DEEP};letter-spacing:-0.02em;margin-top:2px;}
-
-  .panels{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
-  .panel{border-radius:8px;overflow:hidden;border:1px solid ${BORDER};}
-  .ph{padding:9px 14px;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:${WHITE};}
-  .ph-orig{background:${MUTED};}
-  .ph-new{background:${C1};}
-  .pb{padding:10px 14px;}
-
-  .ms{border-radius:8px;overflow:hidden;border:1px solid ${BORDER};margin-bottom:10px;}
-  .ms-head{
-    background:${C1};color:${WHITE};
-    padding:9px 14px;font-size:0.7rem;font-weight:600;
-    letter-spacing:0.1em;text-transform:uppercase;
-  }
-  table{width:100%;border-collapse:collapse;}
-  th{
-    background:${LIGHT};padding:7px 10px;text-align:center;
-    font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;
-    color:${MUTED};font-weight:600;border-bottom:1px solid ${BORDER};
-  }
-  .foot{
-    display:flex;justify-content:space-between;align-items:center;
-    border-top:1px solid ${BORDER};padding-top:9px;
-    font-size:0.64rem;color:${MUTED};
-  }
-  .foot strong{color:${C1};}
-
-  @page { size: letter landscape; margin: 0.4in; }
-  @media print {
-    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-    body{padding:0;}
-  }
-</style>
-</head>
-<body>
-
-<div class="hd">
-  <div class="hd-title">Mortgage <span>Side by Side</span> &nbsp;—&nbsp; Loan comparison</div>
-  <div class="hd-sub">Prepared for your review<br>${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
-</div>
-
-<div class="banner">
-  <div class="bcard">
-    <div class="bcard-label">Time saved</div><div class="bcard-val">${sumTime}</div>
-  </div>
-  <div class="bcard">
-    <div class="bcard-label">Total interest savings</div><div class="bcard-val">${sumInt}</div>
-  </div>
-</div>
-
-<div class="panels">
-  <div class="panel">
-    <div class="ph ph-orig">Current loan</div>
-    <div class="pb">
-      ${row('Principal (original balance)', fmtD(oP))}
-      ${row('Annual interest rate', (oR||'—')+'%')}
-      ${row('Term', termStr(oTY,oTM))}
-      ${row('Property taxes (monthly)', fmtD(oTax))}
-      ${row('HOI (monthly)', fmtD(oHOI))}
-      ${row('Monthly payment (P&I)', origPmt, C2)}
-      ${row('Total monthly (PITI)', origTotal, C2)}
-      ${row('Years to payoff', origYrs)}
-      ${row('Total interest paid', origInt, '#b03030')}
-    </div>
-  </div>
-  <div class="panel">
-    <div class="ph ph-new">New loan</div>
-    <div class="pb">
-      ${row('New loan amount', fmtD(nP))}
-      ${row('Annual interest rate', (nR||'—')+'%')}
-      ${row('Term', termStr(nTY,nTM))}
-      ${row('Property taxes (monthly)', fmtD(nTax))}
-      ${row('HOI (monthly)', fmtD(nHOI))}
-      ${nE && parseFloat(nE) > 0 ? row('Extra monthly payment', fmtD(nE)) : ''}
-      ${row('Base monthly payment (P&I)', newBase, C2)}
-      ${row('Total monthly (PITI)', newAllIn, C2)}
-      ${row('Years to payoff', newYrs)}
-      ${row('Time saved vs current', timeSaved, GREEN)}
-      ${row('Total payments saved', pmtSaved, GREEN)}
-    </div>
-  </div>
-</div>
-
-<div class="ms">
-  <div class="ms-head">Balance milestone comparison — 5 / 10 / 15 / 20 / 25 / 30 years</div>
-  <table>
-    <thead><tr>
-      <th>Year</th>
-      <th>Current loan balance</th>
-      <th style="color:${C1};">New loan balance</th>
-      <th>Balance difference</th>
-      <th>Interest saved</th>
-    </tr></thead>
-    <tbody>${milestoneRows}</tbody>
-  </table>
-</div>
-
-<div class="foot">
-  <span>Mortgage Side by Side &nbsp;|&nbsp; Confidential — for discussion purposes only</span>
-  <span><strong>Questions?</strong> Contact your loan officer for details.</span>
-</div>
-
-</body></html>`;
-}
-
-function downloadPresentation() {
-  const html = buildPresentationHTML();
-  const blob = new Blob([html], { type: 'text/html' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'New_Loan_Presentation.html';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-function previewPresentation() {
-  const html = buildPresentationHTML();
-  const blob = new Blob([html], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  window.open(url, '_blank');
-}
-
-function saveAsPDF() {
-  closePresentModal();
-  setTimeout(() => {
-    enterPrintMode();
-    setTimeout(() => window.print(), 300);
-  }, 200);
-}
-
-// ────────────────────────────────────────────────
-//  PRINT MODE
-// ────────────────────────────────────────────────
-function enterPrintMode() {
-  document.body.classList.add('print-mode');
-  setTimeout(() => window.print(), 200);
-}
-function exitPrintMode() {
-  document.body.classList.remove('print-mode');
-}
-
-// Close modal on backdrop click or Escape
-document.getElementById('presentModal').addEventListener('click', e => {
-  if (e.target.id === 'presentModal') closePresentModal();
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closePresentModal();
-});
 
 // Redraw charts on window resize
 let resizeTimer;
