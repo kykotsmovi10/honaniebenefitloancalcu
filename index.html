@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mortgage Calculators</title>
+<meta name="theme-color" content="#1e2b4d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1e2b4d;
+  --navy-deep:#172239;
+  --navy-soft:#2b3652;
+  --gold:#c3a163;
+  --green:#6f7f2e;
+  --green-text:#68762b;
+  --green-bright:#a8c44a;
+  --callout:#eef3d8;
+
+  --panel:#f1f4f9;
+  --panel-line:#dee1e9;
+  --border:#dfe4ee;
+  --card:#fff;
+
+  --panel-dark:#141a26;
+  --panel-dark-line:#2c3548;
+  --panel-dark-muted:#9aa3b5;
+
+  --ink:#1e2b4d;
+  --muted:#1a1a1a;
+  --dim:#7d8699;
+
+  --nav-h:112px;
+  --nav-h-mobile:64px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--panel);
+  color:var(--ink);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  font-feature-settings:'tnum' 1;
+}
+
+/* ── STICKY TOP BAR ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:var(--navy);
+}
+.brand{
+  display:flex;align-items:center;justify-content:center;gap:11px;
+  padding:16px 24px 0;
+}
+.brand .mark{
+  width:28px;height:28px;border-radius:7px;
+  background:rgba(255,255,255,.12);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.brand h1{
+  font-size:19px;font-weight:700;color:#fff;letter-spacing:-.4px;line-height:1.2;
+}
+.brand h1 span{color:var(--gold)}
+.brand .tag{
+  display:block;font-size:10px;font-weight:600;color:var(--gold);
+  text-transform:uppercase;letter-spacing:1.8px;margin-top:2px;
+}
+
+/* nav row */
+.nav{
+  display:flex;align-items:center;justify-content:center;
+  gap:34px;flex-wrap:wrap;
+  padding:14px 24px 15px;
+}
+.nav-btn{
+  background:none;border:none;cursor:pointer;
+  font-family:inherit;font-size:14.5px;font-weight:500;
+  color:rgba(255,255,255,.62);
+  padding:5px 2px;position:relative;
+  white-space:nowrap;
+  transition:color .18s;
+}
+.nav-btn:hover{color:#fff}
+.nav-btn.active{color:#fff;font-weight:600}
+.nav-btn.active::after{
+  content:'';position:absolute;left:0;right:0;bottom:-2px;
+  height:2px;border-radius:2px;background:var(--gold);
+}
+.nav-btn:focus-visible{
+  outline:2px solid var(--gold);outline-offset:3px;border-radius:4px;
+}
+
+/* ── HAMBURGER (mobile) ── */
+.hamburger{
+  display:none;
+  position:fixed;top:11px;right:14px;z-index:120;
+  width:42px;height:42px;border-radius:9px;
+  background:rgba(255,255,255,.12);border:none;cursor:pointer;
+  flex-direction:column;align-items:center;justify-content:center;gap:5px;
+}
+.hamburger span{
+  display:block;width:19px;height:2px;background:#fff;border-radius:2px;
+  transition:transform .28s,opacity .2s;
+}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(4px,-4px)}
+
+/* ── FRAMES ── */
+.main{
+  position:absolute;top:var(--nav-h);left:0;right:0;bottom:0;
+  background:var(--panel);
+}
+.calc-frame{
+  width:100%;height:100%;border:none;display:block;
+  position:absolute;top:0;left:0;
+  visibility:hidden;pointer-events:none;z-index:0;
+}
+.calc-frame.active{visibility:visible;pointer-events:auto;z-index:1}
+
+/* ── MOBILE ── */
+@media(max-width:860px){
+  .topbar{background:var(--navy)}
+  .brand{justify-content:flex-start;padding:0 62px 0 18px;height:var(--nav-h-mobile)}
+  .hamburger{display:flex}
+  .nav{
+    display:none;
+    flex-direction:column;align-items:stretch;gap:0;
+    padding:6px 12px 14px;
+    border-top:1px solid rgba(255,255,255,.1);
+    max-height:calc(100vh - var(--nav-h-mobile));overflow-y:auto;
+  }
+  .nav.open{display:flex}
+  .nav-btn{
+    text-align:left;padding:13px 10px;font-size:15px;
+    border-radius:8px;
+  }
+  .nav-btn.active{background:rgba(255,255,255,.09)}
+  .nav-btn.active::after{
+    left:10px;right:auto;bottom:auto;top:13px;
+    width:3px;height:20px;border-radius:2px;
+  }
+  .nav-btn.active{padding-left:20px}
+  .main{top:var(--nav-h-mobile)}
+}
+
+@media print{
+  .topbar,.hamburger{display:none!important}
+  .main{position:static;top:0}
+  .calc-frame:not(.active){display:none!important}
+}
+</style>
+</head>
+<body>
+
+<button class="hamburger" id="hamburger" onclick="toggleNav()" aria-label="Toggle calculator menu" aria-expanded="false">
+  <span></span><span></span><span></span>
+</button>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="mark" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <div>
+      <h1>Mortgage <span>Calculators</span></h1>
+      <span class="tag">Client Call Tools</span>
+    </div>
+  </div>
+
+  <nav class="nav" id="nav" aria-label="Calculators">
+    <button class="nav-btn active" data-frame="frame-debt"  onclick="showFrame(this)">Mortgage Debt</button>
+    <button class="nav-btn"        data-frame="frame-sbs"   onclick="showFrame(this)">Side by Side</button>
+    <button class="nav-btn"        data-frame="frame-pmt"   onclick="showFrame(this)">Payment Comparison</button>
+    <button class="nav-btn"        data-frame="frame-rate"  onclick="showFrame(this)">Interest Rate</button>
+    <button class="nav-btn"        data-frame="frame-heloc" onclick="showFrame(this)">HELOC</button>
+  </nav>
+</header>
+
+<div class="main" id="main">
+  <iframe id="frame-debt"  class="calc-frame active" src="mortgage-debt-calculator.html" title="Mortgage Debt Calculator"></iframe>
+  <iframe id="frame-sbs"   class="calc-frame" src="mortgage-side-by-side.html"    title="Mortgage Side by Side"></iframe>
+  <iframe id="frame-pmt"   class="calc-frame" src="payment-comparison.html"       title="Payment Comparison"></iframe>
+  <iframe id="frame-rate"  class="calc-frame" src="interest-rate-calculator.html" title="Interest Rate Calculator"></iframe>
+  <iframe id="frame-heloc" class="calc-frame" src="heloc-calc.html"               title="HELOC Calculator"></iframe>
+</div>
+
+<script>
+function showFrame(btn){
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.remove('active');
+    b.removeAttribute('aria-current');
+  });
+  btn.classList.add('active');
+  btn.setAttribute('aria-current','page');
+
+  const id=btn.getAttribute('data-frame');
+  document.querySelectorAll('.calc-frame').forEach(f=>{
+    f.classList.toggle('active',f.id===id);
+  });
+
+  if(window.innerWidth<=860) closeNav();
+}
+
+function toggleNav(){
+  const nav=document.getElementById('nav');
+  const open=nav.classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open',open);
+  document.getElementById('hamburger').setAttribute('aria-expanded',open);
+}
+function closeNav(){
+  document.getElementById('nav').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+  document.getElementById('hamburger').setAttribute('aria-expanded','false');
+}
+
+// Close the mobile menu on Escape, and reset state when returning to desktop
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeNav(); });
+window.addEventListener('resize',()=>{ if(window.innerWidth>860) closeNav(); });
+
+// Mark the starting tab for screen readers
+document.querySelector('.nav-btn.active').setAttribute('aria-current','page');
+
+// Keep the frame area flush under the bar, whatever height it ends up being
+// (font loading and wrapping can change it, so measure rather than hardcode).
+function syncNavHeight(){
+  const h = document.querySelector('.topbar').offsetHeight;
+  document.documentElement.style.setProperty('--nav-h', h+'px');
+  document.documentElement.style.setProperty('--nav-h-mobile', h+'px');
+}
+syncNavHeight();
+window.addEventListener('resize', syncNavHeight);
+window.addEventListener('load', syncNavHeight);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncNavHeight);
+new ResizeObserver(syncNavHeight).observe(document.querySelector('.topbar'));
+</script>
+</body>
+</html>
