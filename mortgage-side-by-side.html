@@ -159,8 +159,12 @@
     background: var(--navy); color: var(--white);
     padding: 16px 24px; font-size: 17px; font-weight: 700; letter-spacing: -0.3px;
   }
+  .milestone-scroll { max-height: 560px; overflow-y: auto; }
   .milestone-table { width: 100%; border-collapse: collapse; font-size: 14px; }
   .milestone-table thead tr { background: var(--panel); }
+  .milestone-table thead th {
+    position: sticky; top: 0; z-index: 2; background: var(--panel);
+  }
   .milestone-table th {
     padding: 11px 16px; text-align: center;
     font-size: 11px; letter-spacing: 0.8px; text-transform: uppercase;
@@ -200,6 +204,7 @@
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     .site-header { padding: 12px 20px; }
     .comparison-grid { page-break-inside: avoid; }
+    .milestone-scroll { max-height: none; overflow: visible; }
   }
   .field-value-print {
     display: none; font-size: 15px; font-weight: 700;
@@ -276,17 +281,21 @@
         </span>
       </div>
       <div class="field-row">
-        <span class="field-label">Property taxes (monthly)</span>
+        <span class="field-label">Remaining term <span style="color:var(--dim);font-weight:500;">(months left to pay)</span></span>
         <span>
-          <input type="number" id="orig-tax" placeholder="$0.00" oninput="calc()">
-          <span class="field-value-print" id="orig-tax-print"></span>
+          <input type="number" id="orig-remaining-mo" placeholder="0" oninput="calc()">
+          <span class="field-value-print" id="orig-remaining-mo-print"></span>
         </span>
       </div>
+      <div class="field-row" style="margin-top:-2px;">
+        <span class="field-label" style="font-size:0.78rem;color:var(--dim);">Remaining time on this loan</span>
+        <span class="field-value" style="font-size:0.82rem;" id="orig-remaining-display">—</span>
+      </div>
       <div class="field-row">
-        <span class="field-label">HOI (monthly)</span>
+        <span class="field-label">Escrow (monthly) <span style="color:var(--dim);font-weight:500;">(taxes + insurance)</span></span>
         <span>
-          <input type="number" id="orig-hoi" placeholder="$0.00" oninput="calc()">
-          <span class="field-value-print" id="orig-hoi-print"></span>
+          <input type="number" id="orig-escrow" placeholder="$0.00" oninput="calc()">
+          <span class="field-value-print" id="orig-escrow-print"></span>
         </span>
       </div>
       <div class="field-row">
@@ -294,7 +303,7 @@
         <span class="field-value calc" id="orig-payment">—</span>
       </div>
       <div class="field-row">
-        <span class="field-label">Total monthly (P&amp;I + tax + HOI)</span>
+        <span class="field-label">Total monthly (P&amp;I + escrow)</span>
         <span class="field-value calc" id="orig-total-monthly">—</span>
       </div>
       <div class="field-row">
@@ -336,17 +345,10 @@
         </span>
       </div>
       <div class="field-row">
-        <span class="field-label">Property taxes (monthly)</span>
+        <span class="field-label">Escrow (monthly) <span style="color:var(--dim);font-weight:500;">(taxes + insurance)</span></span>
         <span>
-          <input type="number" id="new-tax" placeholder="$0.00" oninput="calc()">
-          <span class="field-value-print" id="new-tax-print"></span>
-        </span>
-      </div>
-      <div class="field-row">
-        <span class="field-label">HOI (monthly)</span>
-        <span>
-          <input type="number" id="new-hoi" placeholder="$0.00" oninput="calc()">
-          <span class="field-value-print" id="new-hoi-print"></span>
+          <input type="number" id="new-escrow" placeholder="$0.00" oninput="calc()">
+          <span class="field-value-print" id="new-escrow-print"></span>
         </span>
       </div>
       <div class="field-row">
@@ -365,7 +367,7 @@
         <span class="field-value calc" id="new-total-payment">—</span>
       </div>
       <div class="field-row">
-        <span class="field-label">Total monthly (P&amp;I + extra + tax + HOI)</span>
+        <span class="field-label">Total monthly (P&amp;I + extra + escrow)</span>
         <span class="field-value calc" id="new-total-monthly">—</span>
       </div>
       <div class="field-row">
@@ -386,8 +388,9 @@
   <!-- MILESTONE TABLE -->
   <div class="milestone-wrapper">
     <div class="milestone-header">
-      Milestone comparison — loan balances at 5, 10, 15, 20, 25, 30 years
+      Milestone comparison — loan balances by year (1–30)
     </div>
+    <div class="milestone-scroll">
     <table class="milestone-table">
       <thead>
         <tr>
@@ -402,6 +405,7 @@
         <tr><td colspan="5" style="color:var(--dim);padding:20px;">Enter loan details above to see the milestone comparison.</td></tr>
       </tbody>
     </table>
+    </div>
   </div>
 
   <!-- VISUALS -->
@@ -477,6 +481,20 @@ function calc() {
   const oTMo  = num('orig-term-mo');
   const oTotalMo = oTYrs * 12 + oTMo;
 
+  // Remaining term (months left to pay) is informational only — it does NOT
+  // affect the payment or payoff math below. The principal field is already
+  // the current outstanding balance, so the schedule computed from Term
+  // already represents the remaining-balance payoff path; this field just
+  // converts the months you enter into a years/months-left readout.
+  const oRemMo = num('orig-remaining-mo');
+  const remDisplay = $('orig-remaining-display');
+  if (oRemMo > 0) {
+    const ry = Math.floor(oRemMo / 12), rm = oRemMo % 12;
+    remDisplay.textContent = ry + ' yrs ' + rm + ' mo';
+  } else {
+    remDisplay.textContent = '—';
+  }
+
   const nP = num('new-principal');
   const nR = num('new-rate');
   const nTYrs = num('new-term-yrs');
@@ -488,9 +506,8 @@ function calc() {
   if (oP && oR && oTotalMo) {
     const origResult = amortize(oP, oR, oTotalMo, 0);
     lastOrigResult = origResult;
-    const oTax = num('orig-tax');
-    const oHOI = num('orig-hoi');
-    const origTotalMonthly = origResult.basePayment + oTax + oHOI;
+    const oEscrow = num('orig-escrow');
+    const origTotalMonthly = origResult.basePayment + oEscrow;
     $('orig-payment').textContent = fmt(origResult.basePayment);
     $('orig-total-monthly').textContent = fmt(origTotalMonthly);
     $('orig-years').textContent = (origResult.months / 12).toFixed(1) + ' yrs';
@@ -498,8 +515,8 @@ function calc() {
     $('orig-principal-print').textContent = fmt(oP);
     $('orig-rate-print').textContent = oR + '%';
     $('orig-term-print').textContent = oTYrs + ' yrs' + (oTMo ? ' ' + oTMo + ' mo' : '');
-    $('orig-tax-print').textContent = oTax ? fmt(oTax) : '$0.00';
-    $('orig-hoi-print').textContent = oHOI ? fmt(oHOI) : '$0.00';
+    $('orig-remaining-mo-print').textContent = oRemMo ? oRemMo + ' mo' : '';
+    $('orig-escrow-print').textContent = oEscrow ? fmt(oEscrow) : '$0.00';
   } else {
     $('orig-payment').textContent = '—';
     $('orig-total-monthly').textContent = '—';
@@ -512,10 +529,9 @@ function calc() {
   if (nP && nR && nTotalMo) {
     const newResult = amortize(nP, nR, nTotalMo, nE);
     lastNewResult = newResult;
-    const nTax = num('new-tax');
-    const nHOI = num('new-hoi');
+    const nEscrow = num('new-escrow');
     const totalPmt = newResult.basePayment + nE;
-    const newTotalMonthly = totalPmt + nTax + nHOI;
+    const newTotalMonthly = totalPmt + nEscrow;
     $('new-base-payment').textContent = fmt(newResult.basePayment);
     $('new-total-payment').textContent = fmt(totalPmt);
     $('new-total-monthly').textContent = fmt(newTotalMonthly);
@@ -524,8 +540,7 @@ function calc() {
     $('new-rate-print').textContent = nR + '%';
     $('new-term-print').textContent = nTYrs + ' yrs' + (nTMo ? ' ' + nTMo + ' mo' : '');
     $('new-extra-print').textContent = fmt(nE);
-    $('new-tax-print').textContent = nTax ? fmt(nTax) : '$0.00';
-    $('new-hoi-print').textContent = nHOI ? fmt(nHOI) : '$0.00';
+    $('new-escrow-print').textContent = nEscrow ? fmt(nEscrow) : '$0.00';
 
     if (lastOrigResult) {
       const timeSaved = lastOrigResult.months - newResult.months;
@@ -566,7 +581,7 @@ function updateMilestones() {
     tbody.innerHTML = '<tr><td colspan="5" style="color:#7d8699;padding:20px;">Enter loan details above to see the milestone comparison.</td></tr>';
     return;
   }
-  const years = [5, 10, 15, 20, 25, 30];
+  const years = Array.from({ length: 30 }, (_, i) => i + 1); // every year, 1 through 30
   let html = '';
   years.forEach(yr => {
     const origBal = lastOrigResult ? balanceAtYear(lastOrigResult.schedule, yr) : null;
