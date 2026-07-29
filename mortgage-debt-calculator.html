@@ -61,6 +61,9 @@ const fmt=v=>{if(v==null||isNaN(v))return"$0.00";return new Intl.NumberFormat("e
 const fmt0=v=>{if(v==null||isNaN(v))return"$0";return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(v)};
 const fmtPct=v=>((v||0)*100).toFixed(3)+"%";
 function monthlyPI(p,ar,tm){if(p<=0||tm<=0)return 0;if(ar===0)return p/tm;const r=ar/12;return(p*r*Math.pow(1+r,tm))/(Math.pow(1+r,tm)-1)}
+/* Remaining balance after `paid` payments on an original loan of `p` at annual rate `ar`
+   over `tm` total months. Uses the closed-form amortization balance. */
+function balanceAfter(p,ar,tm,paid){if(p<=0||tm<=0)return 0;if(paid<=0)return p;if(paid>=tm)return 0;const r=ar/12;const base=monthlyPI(p,ar,tm);if(r===0)return Math.max(0,p-base*paid);const bal=p*Math.pow(1+r,paid)-base*((Math.pow(1+r,paid)-1)/r);return Math.max(0,bal)}
 function amortize(p,ar,tm,extra){const r=ar/12,base=monthlyPI(p,ar,tm);let bal=p;const rows=[];let totI=0,totP=0;for(let m=1;m<=tm&&bal>.005;m++){const ip=bal*r;let pp=base-ip+extra;if(pp>bal)pp=bal;bal=Math.max(0,bal-pp);totI+=ip;totP+=pp;rows.push({month:m,payment:ip+pp,principal:pp,interest:ip,balance:bal})}return{rows,totalInterest:totI,months:rows.length}}
 function findEffRate(p,tI,tm){let lo=0,hi=.5;for(let i=0;i<80;i++){const mid=(lo+hi)/2,r=mid/12;if(!r){lo=mid;continue}const pmt=(p*r*Math.pow(1+r,tm))/(Math.pow(1+r,tm)-1);if(pmt*tm-p<tI)lo=mid;else hi=mid}return(lo+hi)/2}
 
@@ -100,6 +103,34 @@ function ModeInp({label,value,onChange,mode,onModeChange,prefix,suffix,step,hint
       {suffix&&<span style={{color:'var(--dim)',fontSize:14,userSelect:'none'}}>{suffix}</span>}
     </div>
     {hint&&<div style={{fontSize:11.5,color:'var(--muted)'}}>{hint}</div>}
+  </div>)}
+
+
+const DEBT_CATS=['Mortgage','Credit Cards','Auto','Other Installments'];
+function DebtLine({debt,onChange,onRemove,canRemove}){return(
+  <div style={{display:'flex',flexWrap:'wrap',gap:10,alignItems:'flex-end'}}>
+    <div style={{display:'flex',flexDirection:'column',gap:7,flex:'1 1 180px',minWidth:150}}>
+      <label className="lbl">Category</label>
+      <div className="field" style={{padding:0}}>
+        <select value={debt.cat} onChange={e=>onChange({...debt,cat:e.target.value})} style={{border:'none',outline:'none',background:'transparent',fontSize:15,fontWeight:600,fontFamily:'inherit',color:'var(--ink)',padding:'11px 12px',width:'100%',cursor:'pointer'}}>
+          {DEBT_CATS.map(c=><option key={c} value={c}>{c}</option>)}
+        </select>
+      </div>
+    </div>
+    <div style={{display:'flex',flexDirection:'column',gap:7,flex:'1 1 130px',minWidth:120}}>
+      <label className="lbl">Balance</label>
+      <div className="field"><span style={{color:'var(--dim)',fontSize:15,fontWeight:500}}>$</span>
+        <input type="number" value={debt.bal} step="any" onChange={e=>onChange({...debt,bal:e.target.value===""?"":Number(e.target.value)})}/></div>
+    </div>
+    <div style={{display:'flex',flexDirection:'column',gap:7,flex:'1 1 130px',minWidth:120}}>
+      <label className="lbl">Monthly payment</label>
+      <div className="field"><span style={{color:'var(--dim)',fontSize:15,fontWeight:500}}>$</span>
+        <input type="number" value={debt.pmt} step="any" onChange={e=>onChange({...debt,pmt:e.target.value===""?"":Number(e.target.value)})}/></div>
+    </div>
+    <button onClick={onRemove} disabled={!canRemove} className="no-print" aria-label="Remove debt"
+      style={{width:38,height:38,flexShrink:0,border:'none',background:canRemove?'none':'none',color:canRemove?'var(--dim)':'var(--border)',fontSize:20,cursor:canRemove?'pointer':'default',borderRadius:6,marginBottom:1}}
+      onMouseOver={e=>{if(canRemove)e.currentTarget.style.background='#fdecea',e.currentTarget.style.color='var(--red)'}}
+      onMouseOut={e=>{e.currentTarget.style.background='none',e.currentTarget.style.color=canRemove?'var(--dim)':'var(--border)'}}>×</button>
   </div>)}
 
 function LoanTypeToggle({value,onChange}){const opts=['Conventional','FHA','VA'];return(
@@ -154,13 +185,14 @@ function Chart({stdRows:sr,extRows:er,termMonths:tm}){if(!sr.length)return null;
     <g transform={`translate(${W-180},${PT+4})`}><line x1={0} y1={0} x2={20} y2={0} stroke="#a9afbc" strokeWidth={2} strokeDasharray="6 3"/><text x={24} y={4} fontSize={10.5} fill="#7d8699" fontFamily="Inter">Standard payoff</text><line x1={0} y1={18} x2={20} y2={18} stroke="#1e2b4d" strokeWidth={2.8}/><text x={24} y={22} fontSize={10.5} fill="#7d8699" fontFamily="Inter">With extra payments</text></g>
   </svg>)}
 
-function ConsolidationBar({curMtgBal:mb,totDebtBal:db,cashInHand:ch,closingCost:cc,principal:p}){
+function ConsolidationBar({curMtgBal:mb,totDebtBal:db,cashInHand:ch,closingCost:cc,escrowFund:ef,principal:p}){
   const Part=({label,val,color})=>(<div style={{flex:'1 1 125px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}>{label}</div><div style={{fontSize:19,fontWeight:700,color:color||'var(--navy)',marginTop:4}}>{fmt(val)}</div></div>);
   const Op=({c})=>(<div style={{fontSize:20,fontWeight:400,color:'#c7cddb',userSelect:'none'}}>{c}</div>);
   return(<div style={{marginTop:18,padding:'18px 20px',background:'var(--panel)',borderRadius:8,border:'1px solid var(--border)'}}>
     <div style={{display:'flex',flexWrap:'wrap',gap:14,alignItems:'center'}}>
       <Part label="Current balance" val={mb}/><Op c="+"/><Part label="Debts consolidated" val={db}/>
       {(cc||0)>0&&<React.Fragment><Op c="+"/><Part label="Closing costs" val={cc}/></React.Fragment>}
+      {(ef||0)>0&&<React.Fragment><Op c="+"/><Part label="Escrow funding" val={ef}/></React.Fragment>}
       {(ch||0)>0&&<React.Fragment><Op c="+"/><Part label="Cash in hand" val={ch} color="var(--green)"/></React.Fragment>}
       <Op c="="/>
       <div style={{flex:'1 1 160px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--navy)',textTransform:'uppercase',letterSpacing:.6}}>New loan amount</div><div style={{fontSize:27,fontWeight:800,color:'var(--navy)',marginTop:4,letterSpacing:-.8}}>{fmt(p)}</div></div>
@@ -222,8 +254,7 @@ function PresentModal({onClose,R,rate,termYrs,totDebtBal,totDebtPmt,applyDebtSav
             <div style={{border:'1px solid var(--border)',borderRadius:10,padding:'6px 20px 14px'}}>
               <SumRow label="Loan amount" value={fmt(R.principal)}/>
               <SumRow label="Principal & interest" value={fmt(R.basePI)}/>
-              <SumRow label="Taxes / mo" value={fmt(R.mTax)}/>
-              <SumRow label="Insurance / mo" value={fmt(R.mIns)}/>
+              <SumRow label="Taxes + insurance / mo" value={fmt(R.mEscrow)}/>
               <SumRow label="Debt payments" value="$0.00" accent="var(--green)"/>
               <SumRow label="Total monthly (PITI)" value={fmt(R.totalPITI)} bold/>
             </div>
@@ -309,45 +340,56 @@ function PresentModal({onClose,R,rate,termYrs,totDebtBal,totDebtPmt,applyDebtSav
 /* ── App ───────────────────────────────────────────────────── */
 function App(){
   const[curLoanType,setCurLoanType]=useState('Conventional');
-  const[curMtgBal,setCurMtgBal]=useState(280000);
+  const[curOrigBal,setCurOrigBal]=useState(300000);      // original loan amount
   const[curRate,setCurRate]=useState(6.5);
-  const[curOrigTerm,setCurOrigTerm]=useState(30);
+  const[curOrigTerm,setCurOrigTerm]=useState(30);         // original term, years
+  const[curRemMonths,setCurRemMonths]=useState(300);      // remaining term, months
   const[curPIManual,setCurPIManual]=useState(null);
-  const[curTax,setCurTax]=useState(300);const[curTaxMode,setCurTaxMode]=useState('monthly');
-  const[curIns,setCurIns]=useState(125);const[curInsMode,setCurInsMode]=useState('monthly');
+  const[curEscrow,setCurEscrow]=useState(425);   // combined taxes + insurance, monthly
   const[curMIP,setCurMIP]=useState(0);const[curMIPMode,setCurMIPMode]=useState('monthly');
   const[curUpfrontMIP,setCurUpfrontMIP]=useState(0);
 
   // P&I auto-calculates from balance + rate + term; typing your own value overrides it.
-  const curPIAuto=monthlyPI(curMtgBal||0,(curRate||0)/100,(curOrigTerm||0)*12);
+  // P&I is fixed by the ORIGINAL loan terms and never changes over its life.
+  const curTermMo=(curOrigTerm||0)*12;
+  const curPIAuto=monthlyPI(curOrigBal||0,(curRate||0)/100,curTermMo);
   const curPI=curPIManual!=null?curPIManual:Math.round(curPIAuto*100)/100;
   const curPIOverridden=curPIManual!=null;
+  // Today's balance = original balance amortized forward by the payments already made.
+  const curPaidMonths=Math.max(0,Math.min(curTermMo,curTermMo-(curRemMonths||0)));
+  const curMtgBal=Math.round(balanceAfter(curOrigBal||0,(curRate||0)/100,curTermMo,curPaidMonths)*100)/100;
 
-  const curMoTax=curTaxMode==='annual'?(curTax||0)/12:(curTax||0);
-  const curMoIns=curInsMode==='annual'?(curIns||0)/12:(curIns||0);
-  const curMoEscrow=curMoTax+curMoIns;
+  const curMoEscrow=curEscrow||0;
   const curMoMI=curLoanType==='FHA'?(curMIPMode==='annual'?(curMIP||0)/12:(curMIP||0)):0;
   const curTotalMtg=(curPI||0)+curMoEscrow+curMoMI;
 
   // Debts being consolidated, entered as two totals rather than line by line.
-  const[totDebtBal,setTotDebtBal]=useState(45500);
-  const[totDebtPmt,setTotDebtPmt]=useState(1135);
+  const[debts,setDebts]=useState([
+    {id:1,cat:'Credit Cards',bal:27315,pmt:828},
+    {id:2,cat:'Auto',bal:18185,pmt:307},
+  ]);
+  const addDebt=()=>setDebts(d=>[...d,{id:Date.now(),cat:'Other Installments',bal:"",pmt:""}]);
+  const updDebt=(i,nd)=>setDebts(d=>d.map((x,k)=>k===i?nd:x));
+  const rmDebt=i=>setDebts(d=>d.filter((_,k)=>k!==i));
+  const totDebtBal=debts.reduce((s,d)=>s+(Number(d.bal)||0),0);
+  const totDebtPmt=debts.reduce((s,d)=>s+(Number(d.pmt)||0),0);
 
   const[rate,setRate]=useState(6.75);const[termYrs,setTermYrs]=useState(30);
-  const[annTax,setAnnTax]=useState(3600);const[taxMode,setTaxMode]=useState('annual');
-  const[annIns,setAnnIns]=useState(1500);const[insMode,setInsMode]=useState('annual');
+  const[newEscrow,setNewEscrow]=useState(425);   // combined taxes + insurance, monthly
   const[cashInHand,setCashInHand]=useState(0);
   const[closingCost,setClosingCost]=useState(0);
+  const[escrowFund,setEscrowFund]=useState(0);   // upfront escrow deposit funded at closing
   const[extraPmt,setExtraPmt]=useState(0);const[applyDebtSav,setApplyDebtSav]=useState(true);
   const[showAmort,setShowAmort]=useState(false);const[showPresent,setShowPresent]=useState(false);
+  // Loan-officer view only: apply the skipped first payment to the break-even. Off by default.
+  const[applySkip,setApplySkip]=useState(false);
 
   const R=useMemo(()=>{
-    const principal=(curMtgBal||0)+totDebtBal+(cashInHand||0)+(closingCost||0);
+    const principal=(curMtgBal||0)+totDebtBal+(cashInHand||0)+(closingCost||0)+(escrowFund||0);
     const ar=(rate||0)/100,tm=(termYrs||30)*12;
-    const mTax=taxMode==='annual'?(annTax||0)/12:(annTax||0);
-    const mIns=insMode==='annual'?(annIns||0)/12:(annIns||0);
+    const mEscrow=newEscrow||0;
     const basePI=monthlyPI(principal,ar,tm);
-    const totalPITI=basePI+mTax+mIns;
+    const totalPITI=basePI+mEscrow;
     const monthlySav=Math.max(0,(curTotalMtg+totDebtPmt)-totalPITI);
     const totalExtra=(extraPmt||0)+(applyDebtSav?monthlySav:0);
     const stdA=amortize(principal,ar,tm,0);
@@ -355,8 +397,8 @@ function App(){
     const intSaved=stdA.totalInterest-extA.totalInterest;
     const moSaved=stdA.months-extA.months;
     const effRate=totalExtra>0?findEffRate(principal,extA.totalInterest,tm):ar;
-    return{principal,basePI,totalPITI,monthlySav,totalExtra,stdA,extA,intSaved,moSaved,effRate,ar,tm,mTax,mIns,mMI:0};
-  },[curMtgBal,rate,termYrs,annTax,taxMode,annIns,insMode,cashInHand,closingCost,extraPmt,applyDebtSav,totDebtBal,totDebtPmt,curTotalMtg]);
+    return{principal,basePI,totalPITI,monthlySav,totalExtra,stdA,extA,intSaved,moSaved,effRate,ar,tm,mEscrow,mMI:0};
+  },[curMtgBal,rate,termYrs,newEscrow,cashInHand,closingCost,escrowFund,extraPmt,applyDebtSav,totDebtBal,totDebtPmt,curTotalMtg]);
 
   const ys=Math.floor(R.moSaved/12),ms=R.moSaved%12,epy=Math.floor(R.extA.months/12),epm=R.extA.months%12;
   const tco=curTotalMtg+totDebtPmt;
@@ -382,11 +424,23 @@ function App(){
 
           <LoanTypeToggle value={curLoanType} onChange={setCurLoanType}/>
 
-          <Inp label="Current mortgage balance" value={curMtgBal} onChange={setCurMtgBal} prefix="$"/>
+          <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
+            <Inp label="Original loan amount" value={curOrigBal} onChange={setCurOrigBal} prefix="$"/>
+            <Inp label="Interest rate" value={curRate} onChange={setCurRate} suffix="%" step="0.125"/>
+          </div>
 
           <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
-            <Inp label="Interest rate" value={curRate} onChange={setCurRate} suffix="%" step="0.125"/>
             <Inp label="Original term (years)" value={curOrigTerm} onChange={setCurOrigTerm} suffix="yr"/>
+            <Inp label="Remaining term (months)" value={curRemMonths} onChange={setCurRemMonths} suffix="mo" hint={curRemMonths>0?`${Math.floor((curRemMonths||0)/12)}yr ${(curRemMonths||0)%12}mo left · ${curPaidMonths} paid`:null}/>
+          </div>
+
+          {/* Today's balance, derived from the original loan and payments made. */}
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,background:'var(--callout)',border:'1px solid #d6e2ac',borderRadius:8,padding:'13px 16px'}}>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:'var(--green-deep)',textTransform:'uppercase',letterSpacing:.8}}>Current balance today</div>
+              <div style={{fontSize:12,color:'var(--green-deep)',opacity:.8,marginTop:2}}>Original {fmt0(curOrigBal)} after {curPaidMonths} payments — rolls into the new loan</div>
+            </div>
+            <div style={{fontSize:26,fontWeight:800,color:'var(--green-deep)',letterSpacing:-.8}}>{fmt(curMtgBal)}</div>
           </div>
 
           {/* P&I — auto-calculated, override allowed */}
@@ -401,14 +455,10 @@ function App(){
               <span style={{color:'var(--dim)',fontSize:15,fontWeight:500,userSelect:'none'}}>$</span>
               <input type="number" value={curPI} onChange={e=>setCurPIManual(e.target.value===""?null:Number(e.target.value))}/>
             </div>
-            <div style={{fontSize:11.5,color:'var(--muted)'}}>{curPIOverridden?`Auto would be ${fmt(curPIAuto)} — using your figure.`:'Calculated from balance, rate and term. Type over it to use the statement figure.'}</div>
+            <div style={{fontSize:11.5,color:'var(--muted)'}}>{curPIOverridden?`Auto would be ${fmt(curPIAuto)} — using your figure.`:'Calculated from the original loan amount, rate and term — this payment is fixed for the life of the loan. Type over it to use the statement figure.'}</div>
           </div>
 
-          <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
-            <ModeInp label="Property taxes" value={curTax} onChange={setCurTax} mode={curTaxMode} onModeChange={setCurTaxMode} prefix="$" hint={curTaxMode==='annual'?`= ${fmt(curMoTax)}/mo`:null}/>
-
-            <ModeInp label="Homeowners insurance" value={curIns} onChange={setCurIns} mode={curInsMode} onModeChange={setCurInsMode} prefix="$" hint={curInsMode==='annual'?`= ${fmt(curMoIns)}/mo`:null}/>
-          </div>
+          <Inp label="Taxes + insurance (monthly)" value={curEscrow} onChange={setCurEscrow} prefix="$" hint="Combined monthly escrow — property taxes and homeowners insurance together."/>
 
           {curLoanType==='FHA'&&<div style={{display:'flex',flexWrap:'wrap',gap:14}}>
             <ModeInp label="MIP (mortgage insurance)" value={curMIP} onChange={setCurMIP} mode={curMIPMode} onModeChange={setCurMIPMode} prefix="$" hint={curMIPMode==='annual'&&curMIP>0?`= ${fmt(curMoMI)}/mo`:null}/>
@@ -436,8 +486,7 @@ function App(){
         <div style={{marginTop:18}}>
           <SumRow dark label="Mortgage balance" value={fmt0(curMtgBal)}/>
           <SumRow dark label="Principal & interest" value={fmt(curPI)}/>
-          <SumRow dark label="Taxes / mo" value={fmt(curMoTax)}/>
-          <SumRow dark label="Insurance / mo" value={fmt(curMoIns)}/>
+          <SumRow dark label="Taxes + insurance / mo" value={fmt(curMoEscrow)}/>
           {curLoanType==='FHA'&&<SumRow dark label="MIP / mo" value={fmt(curMoMI)}/>}
           <SumRow dark label="Current mortgage payment" value={fmt(curTotalMtg)} bold/>
           <SumRow dark label="Debt payments" value={fmt(totDebtPmt)}/>
@@ -450,15 +499,17 @@ function App(){
 
     <div style={{display:'flex',flexDirection:'column',gap:18,marginTop:18}}>
 
-      <Card title="Debts to be paid off in the loan" subtitle="Total balances and total monthly payments across every debt being rolled into the new mortgage." delay={80}>
-        <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
-          <Inp label="Total debt balance" value={totDebtBal} onChange={setTotDebtBal} prefix="$"
-               hint="Everything being paid off at closing, added together."/>
-          <Inp label="Total monthly debt payments" value={totDebtPmt} onChange={setTotDebtPmt} prefix="$"
-               hint="What they pay each month across all of those debts today."/>
+      <Card title="Debts to be paid off in the loan" subtitle="Add each debt being rolled into the new mortgage. Pick a category, then enter the balance and the current monthly payment." delay={80}>
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          {debts.map((d,i)=><DebtLine key={d.id} debt={d} onChange={nd=>updDebt(i,nd)} onRemove={()=>rmDebt(i)} canRemove={debts.length>1}/>)}
         </div>
+        <button onClick={addDebt} className="no-print" style={{marginTop:14,display:'inline-flex',alignItems:'center',gap:7,background:'var(--panel)',border:'1.5px dashed var(--border)',borderRadius:8,padding:'11px 18px',fontSize:13.5,fontWeight:600,color:'var(--navy)',cursor:'pointer',fontFamily:'inherit'}}
+          onMouseOver={e=>e.currentTarget.style.borderColor='var(--navy)'} onMouseOut={e=>e.currentTarget.style.borderColor='var(--border)'}>
+          + Add a debt
+        </button>
 
         <div style={{marginTop:18,padding:'18px 20px',background:'var(--panel)',borderRadius:8,border:'1px solid var(--border)',display:'flex',flexWrap:'wrap',gap:20}}>
+          <div style={{flex:'1 1 150px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}>Total debt balance</div><div style={{fontSize:23,fontWeight:700,color:'var(--navy)',marginTop:4}}>{fmt0(totDebtBal)}</div></div>
           <div style={{flex:'1 1 150px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}>Current mortgage</div><div style={{fontSize:23,fontWeight:700,color:'var(--navy)',marginTop:4}}>{fmt(curTotalMtg)}<span style={{fontSize:13,fontWeight:500,color:'var(--muted)'}}>/mo</span></div></div>
           <div style={{flex:'1 1 150px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}>Debt payments</div><div style={{fontSize:23,fontWeight:700,color:'var(--navy)',marginTop:4}}>{fmt(totDebtPmt)}<span style={{fontSize:13,fontWeight:500,color:'var(--muted)'}}>/mo</span></div></div>
           <div style={{flex:'1 1 170px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--green-deep)',textTransform:'uppercase',letterSpacing:.6}}>Total monthly outgoing</div><div style={{fontSize:26,fontWeight:800,color:'var(--green)',marginTop:4,letterSpacing:-.8}}>{fmt(tco)}<span style={{fontSize:13,fontWeight:500,color:'var(--muted)'}}>/mo</span></div></div>
@@ -471,12 +522,12 @@ function App(){
           <Inp label="Loan term (years)" value={termYrs} onChange={setTermYrs} suffix="yr"/>
         </div>
         <div style={{display:'flex',flexWrap:'wrap',gap:14,marginTop:16}}>
-          <ModeInp label="Property taxes" value={annTax} onChange={setAnnTax} mode={taxMode} onModeChange={setTaxMode} prefix="$"/>
-          <ModeInp label="Homeowners insurance" value={annIns} onChange={setAnnIns} mode={insMode} onModeChange={setInsMode} prefix="$"/>
+          <Inp label="Taxes + insurance (monthly)" value={newEscrow} onChange={setNewEscrow} prefix="$" hint="Combined monthly escrow — property taxes and homeowners insurance together."/>
           <Inp label="Closing costs" value={closingCost} onChange={setClosingCost} prefix="$" hint="Rolled into the new loan."/>
+          <Inp label="Escrow account funding" value={escrowFund} onChange={setEscrowFund} prefix="$" hint="Upfront deposit to fund the escrow account at closing. Financed into the loan."/>
           <Inp label="Cash in hand" value={cashInHand} onChange={setCashInHand} prefix="$"/>
         </div>
-        <ConsolidationBar curMtgBal={curMtgBal} totDebtBal={totDebtBal} cashInHand={cashInHand} closingCost={closingCost} principal={R.principal}/>
+        <ConsolidationBar curMtgBal={curMtgBal} totDebtBal={totDebtBal} cashInHand={cashInHand} closingCost={closingCost} escrowFund={escrowFund} principal={R.principal}/>
       </Card>
 
       <Card title="Monthly payment comparison" delay={160}>
@@ -490,7 +541,7 @@ function App(){
           <div style={{flex:'1 1 250px',border:'1px solid var(--border)',borderRadius:10,padding:'6px 20px 14px'}}>
             <div style={{fontSize:11.5,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:1,padding:'14px 0 2px'}}>New payment</div>
             <SumRow label="Principal & interest" value={fmt(R.basePI)}/>
-            <SumRow label="Escrow (taxes + ins)" value={fmt(R.mTax+R.mIns)}/>
+            <SumRow label="Escrow (taxes + ins)" value={fmt(R.mEscrow)}/>
             <SumRow label="Debt payments" value="$0.00" accent="var(--green)"/>
             <SumRow label="Total" value={fmt(R.totalPITI)} bold accent="var(--green)"/>
           </div>
@@ -510,6 +561,32 @@ function App(){
             <Inp label="Additional extra payment" value={extraPmt} onChange={setExtraPmt} prefix="$"/>
           </div>
         </div>
+
+        {/* Break-even on closing costs — loan-officer reference, not shown to the client. */}
+        {(closingCost||0)>0&&R.monthlySav>0&&(()=>{
+          const skip=curPI||0;
+          const net=Math.max(0,(closingCost||0)-(applySkip?skip:0));
+          const mo=net/R.monthlySav;
+          const lbl=mo<1?'< 1 month':mo<12?`${Math.round(mo)} months`:`${Math.floor(mo/12)}yr ${Math.round(mo%12)}mo`;
+          return(
+          <div style={{marginTop:14,background:'var(--panel-dark)',borderRadius:10,padding:'18px 22px',display:'flex',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:16}}>
+            <div>
+              <div style={{fontSize:11,fontWeight:600,color:'var(--panel-dark-muted)',textTransform:'uppercase',letterSpacing:1.2}}>Break-even on closing costs <span style={{color:'var(--gold)'}}>· your view</span></div>
+              <div style={{fontSize:32,fontWeight:800,color:'var(--green-bright)',marginTop:4,letterSpacing:-1.2}}>{lbl}</div>
+              <div style={{fontSize:12.5,color:'var(--panel-dark-muted)',marginTop:4}}>
+                {fmt0(net)} closing costs ÷ {fmt0(R.monthlySav)}/mo saved{applySkip&&skip>0?` · after ${fmt0(skip)} skipped payment`:''}
+              </div>
+            </div>
+            <label className="no-print" style={{display:'flex',alignItems:'center',gap:9,cursor:'pointer',fontSize:12.5,fontWeight:600,color:'#fff',userSelect:'none'}}>
+              <span style={{position:'relative',width:38,height:22,flexShrink:0}}>
+                <input type="checkbox" checked={applySkip} onChange={e=>setApplySkip(e.target.checked)} style={{opacity:0,width:0,height:0}}/>
+                <span style={{position:'absolute',inset:0,borderRadius:22,background:applySkip?'var(--green)':'var(--panel-dark-line)',transition:'background .18s'}}></span>
+                <span style={{position:'absolute',top:3,left:applySkip?19:3,width:16,height:16,borderRadius:'50%',background:'#fff',transition:'left .18s'}}></span>
+              </span>
+              Apply skipped first payment
+            </label>
+          </div>);
+        })()}
       </Card>
 
       <Card title="Interest savings and payoff" delay={200}>
