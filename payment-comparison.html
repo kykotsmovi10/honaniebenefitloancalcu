@@ -161,6 +161,16 @@
   }
   .field-input::placeholder { color: var(--dim); font-weight: 500; }
 
+  select.field-input {
+    -webkit-appearance: none; -moz-appearance: none; appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%237d8699'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 14px;
+    padding-right: 30px;
+  }
+
   .computed-val {
     font-size: 15px; font-weight: 700;
     letter-spacing: -0.2px;
@@ -419,6 +429,17 @@
             <span class="print-val" id="r-extra-pv"></span>
           </span>
         </div>
+        <div class="field-row">
+          <span class="field-label">Extra payment frequency</span>
+          <span class="input-wrap">
+            <select class="field-input" id="r-extra-freq" onchange="calc()">
+              <option value="monthly" selected>Monthly</option>
+              <option value="biweekly">Biweekly</option>
+              <option value="annual">Annual</option>
+            </select>
+            <span class="print-val" id="r-extra-freq-pv"></span>
+          </span>
+        </div>
         <div class="total-row">
           <span class="total-label">Total</span>
           <span class="total-value right-color" id="r-total">—</span>
@@ -471,7 +492,7 @@ function pmtCalc(P,annualRate,months){
   return P*(r*Math.pow(1+r,months))/(Math.pow(1+r,months)-1);
 }
 
-function amortize(P,annualRate,months,extra){
+function amortize(P,annualRate,months,extra,freq){
   if(!P||!annualRate||!months)return{totalInterest:0,actualMonths:0};
   const r=annualRate/100/12;
   const basePmt=pmtCalc(P,annualRate,months);
@@ -479,7 +500,13 @@ function amortize(P,annualRate,months,extra){
   while(bal>0.005&&m<months){
     m++;
     const ip=bal*r;
-    let pp=basePmt-ip+extra;
+    // Convert the extra payment to what it contributes toward this month's
+    // principal, based on how often it's actually made.
+    let extraThisMonth;
+    if(freq==='biweekly') extraThisMonth=extra*26/12;       // 26 extra payments/yr, smoothed monthly
+    else if(freq==='annual') extraThisMonth=(m%12===0)?extra:0; // one lump sum per year
+    else extraThisMonth=extra;                               // monthly (default)
+    let pp=basePmt-ip+extraThisMonth;
     if(pp>bal)pp=bal;
     bal=Math.max(0,bal-pp);
     totI+=ip;
@@ -503,10 +530,14 @@ function findEffectiveRate(P,totalInterest,months){
   return(lo+hi)/2;
 }
 
+const freqLabel={monthly:'monthly',biweekly:'biweekly',annual:'annual'};
+
 function calcSide(prefix,hasDebt){
   const A=num(prefix+'-amount'),M=num(prefix+'-months'),R=num(prefix+'-rate');
   const tax=num(prefix+'-tax'),hoi=num(prefix+'-hoi'),extra=num(prefix+'-extra');
   const debt=hasDebt?num(prefix+'-debt'):0;
+  const freqEl=$(prefix+'-extra-freq');
+  const freq=freqEl?freqEl.value:'monthly';
 
   let pmt=0;
   if(A&&M&&R) pmt=pmtCalc(A,R,M);
@@ -522,15 +553,16 @@ function calcSide(prefix,hasDebt){
   const effDetail=$(prefix+'-eff-detail');
 
   if(A&&M&&R&&extra>0){
-    const stdAmort=amortize(A,R,M,0);
-    const extAmort=amortize(A,R,M,extra);
+    const stdAmort=amortize(A,R,M,0,freq);
+    const extAmort=amortize(A,R,M,extra,freq);
     const intSaved=stdAmort.totalInterest-extAmort.totalInterest;
     const moSaved=stdAmort.actualMonths-extAmort.actualMonths;
     const effRate=findEffectiveRate(A,extAmort.totalInterest,M);
 
     effEl.textContent=(effRate*100).toFixed(3)+'%';
     const ey=Math.floor(extAmort.actualMonths/12),em=extAmort.actualMonths%12;
-    effSub.innerHTML=`Your <strong>${R}%</strong> rate with <strong>${fmt(extra)}/mo</strong> extra acts like a <strong>${(effRate*100).toFixed(3)}%</strong> rate`;
+    const extraLabel=freq==='monthly'?`${fmt(extra)}/mo`:`${fmt(extra)} ${freqLabel[freq]}`;
+    effSub.innerHTML=`Your <strong>${R}%</strong> rate with <strong>${extraLabel}</strong> extra acts like a <strong>${(effRate*100).toFixed(3)}%</strong> rate`;
     effDetail.style.display='flex';
     $(prefix+'-eff-saved').textContent=fmt(intSaved);
     $(prefix+'-eff-payoff').textContent=`${ey}yr ${em}mo`;
@@ -561,13 +593,14 @@ function calc(){
 
   // Print values
   ['l-amount','l-months','l-rate','l-tax','l-hoi','l-extra','l-debt',
-   'r-amount','r-months','r-rate','r-tax','r-hoi','r-extra'].forEach(id=>{
+   'r-amount','r-months','r-rate','r-tax','r-hoi','r-extra','r-extra-freq'].forEach(id=>{
     const el=$(id);
     const pv=$(id+'-pv');
     if(!el||!pv)return;
     const v=el.value;
     if(v){
-      if(id.includes('rate'))pv.textContent=v+'%';
+      if(id.includes('freq'))pv.textContent=v.charAt(0).toUpperCase()+v.slice(1);
+      else if(id.includes('rate'))pv.textContent=v+'%';
       else if(id.includes('months'))pv.textContent=v;
       else pv.textContent=fmt(parseFloat(v)||0);
     }else pv.textContent='';
