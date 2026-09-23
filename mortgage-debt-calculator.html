@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Mortgage Debt Calculator</title>
-<meta name="theme-color" content="#1e2b4d"/><meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Debt Consolidation Calculator</title>
+<meta name="theme-color" content="#1e2b4d"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -12,621 +13,608 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <style>
 :root{
-  --navy:#1e2b4d;
-  --navy-deep:#172239;
-  --navy-soft:#2b3652;
+  --navy:#1e2b4d; --navy-deep:#172239; --navy-soft:#2b3652;
   --gold:#c3a163;
-  --green:#6f7f2e;
-  --green-bright:#a8c44a;
-  --green-deep:#3e4a1e;
+  --green:#6f7f2e; --green-text:#68762b; --green-deep:#3e4a1e; --green-bright:#a8c44a;
   --callout:#eef3d8;
-  --panel:#f1f4f9;
-  --panel-dark:#141a26;
-  --panel-dark-line:#2c3548;
-  --panel-dark-muted:#9aa3b5;
-  --panel-line:#dee1e9;
-  --border:#dfe4ee;
-  --muted:#1a1a1a;
-  --dim:#7d8699;
-  --ink:#1e2b4d;
-  --card:#fff;
-  --radius:10px;
+  --red:#b03030; --red-soft:#e08a8a; --red-bg:#fdecea; --red-line:#e8b4b4;
+  --panel:#f1f4f9; --panel-line:#dee1e9; --border:#dfe4ee; --card:#fff;
+  --panel-dark:#141a26; --panel-dark-line:#2c3548; --panel-dark-muted:#9aa3b5;
+  --ink:#1e2b4d; --muted:#1a1a1a; --dim:#7d8699;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--panel);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;font-feature-settings:'tnum' 1}
-@media print{body{background:#fff;font-size:10px}.no-print{display:none!important}.card{box-shadow:none!important;border:1px solid #ddd!important;break-inside:avoid}.present-overlay{position:relative!important;background:#fff!important;overflow:visible!important;padding:0!important}.present-page{box-shadow:none!important;max-height:none!important;overflow:visible!important;border:none!important;max-width:100%!important;border-radius:0!important}}
-::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-track{background:var(--panel)}::-webkit-scrollbar-thumb{background:#c7cddb;border-radius:4px}
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-.animate-in{animation:fadeUp .45s ease-out both}
-@media (prefers-reduced-motion:reduce){.animate-in{animation:none}*{transition:none!important}}
-@keyframes modalIn{from{opacity:0;transform:scale(.98) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
-@keyframes overlayIn{from{opacity:0}to{opacity:1}}
-input[type="number"]{-moz-appearance:textfield}
-input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none}
-input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
-.field{display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;transition:border-color .18s,box-shadow .18s}
-.field:focus-within{border-color:var(--navy);box-shadow:0 0 0 3px rgba(30,43,77,.08)}
-.field input{border:none;outline:none;background:transparent;font-size:16px;font-weight:500;color:var(--ink);width:100%;font-family:inherit}
-.field input::placeholder{color:#aab1c0}
-.lbl{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-.1px}
-.present-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(23,34,57,.62);backdrop-filter:blur(8px);z-index:2000;overflow-y:auto;animation:overlayIn .25s ease-out;padding:24px}
-.present-page{background:#fff;border-radius:16px;box-shadow:0 24px 80px rgba(23,34,57,.3);max-width:880px;width:100%;margin:0 auto;animation:modalIn .35s ease-out;overflow:hidden}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--panel);color:var(--ink);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;font-feature-settings:'tnum' 1}
+
+.bar{background:var(--navy);color:#fff;padding:22px 40px}
+.bar h1{font-size:23px;font-weight:700;letter-spacing:-.4px;line-height:1.2}
+.bar h1 span{color:var(--gold)}
+.bar .tag{display:block;font-size:12.5px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:2px;margin-top:4px}
+
+.wrap{max-width:1080px;margin:0 auto;padding:24px 24px 60px}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 2px 8px rgba(30,43,77,.07);overflow:hidden;margin-bottom:20px}
+.cardhdr{background:var(--navy);color:#fff;padding:15px 22px;font-size:17px;font-weight:700;letter-spacing:-.3px}
+.cardhdr span{color:var(--gold);font-weight:600}
+.cardbody{padding:22px 24px}
+
+/* ── DEBT INPUT ROWS ── */
+.chead{display:flex;gap:10px;padding:0 0 8px;font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.8px}
+.chead .c-name{flex:2 1 130px}
+.chead .c-type{flex:1 1 110px}
+.chead .c-num{flex:1 1 100px;text-align:right}
+.chead .c-x{width:30px}
+.crow{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--panel-line);flex-wrap:wrap}
+.crow .f-name{flex:2 1 130px}
+.crow .f-type{flex:1 1 110px}
+.crow .f-num{flex:1 1 100px}
+.inpwrap{display:flex;align-items:center;border:1.5px solid var(--border);background:var(--card);border-radius:8px;padding:0 10px;min-width:0;transition:border-color .15s,box-shadow .15s}
+.inpwrap:focus-within{border-color:var(--navy);box-shadow:0 0 0 3px rgba(30,43,77,.08)}
+.inpwrap .pre,.inpwrap .suf{color:var(--dim);font-size:13px;font-weight:500}
+.inpwrap .pre{padding-right:4px}.inpwrap .suf{padding-left:4px}
+.inpwrap input{border:none;outline:none;background:transparent;font-size:14.5px;font-weight:600;font-family:inherit;color:var(--ink);padding:8px 0;width:100%;min-width:0;text-align:right}
+.inpwrap input.txt{text-align:left;font-weight:600}
+.inpwrap input::placeholder{color:var(--dim);font-weight:500}
+.xbtn{width:30px;height:30px;border:none;background:none;color:var(--dim);font-size:19px;cursor:pointer;border-radius:6px;flex-shrink:0;line-height:1}
+.xbtn:hover{color:var(--red);background:var(--red-bg)}
+.rowsel{width:100%;border:1.5px solid var(--border);background:var(--card);border-radius:8px;padding:8px 8px;font-size:14px;font-weight:600;font-family:inherit;color:var(--ink);cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.rowsel:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(30,43,77,.08)}
+.revtag{font-size:11.5px;color:var(--dim);font-weight:600;font-style:italic;padding:8px 2px;text-align:right;line-height:1.3}
+.addbtn{margin-top:14px;background:var(--card);border:1.5px dashed var(--border);border-radius:8px;padding:11px 22px;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .18s}
+.addbtn:hover{border-color:var(--navy);color:var(--navy)}
+.warn{font-size:12px;color:var(--red);font-weight:600;margin-top:8px}
+
+/* ── LOAN FIELD GRID ── */
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 20px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
+.field .inpwrap input{text-align:left}
+.field select{width:100%;border:1.5px solid var(--border);background:var(--card);border-radius:8px;padding:8px 10px;font-size:14.5px;font-weight:600;font-family:inherit;color:var(--ink);cursor:pointer}
+.field select:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(30,43,77,.08)}
+
+/* ── TOTALS STRIP ── */
+.totals{display:flex;flex-wrap:wrap;gap:22px;margin-top:18px;padding:18px 20px;background:var(--panel);border-radius:8px}
+.tot{flex:1 1 130px}
+.tot .k{font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.7px}
+.tot .v{font-size:22px;font-weight:800;color:var(--navy);letter-spacing:-.7px;margin-top:3px}
+.tot .v.red{color:var(--red)}
+.tot .v.gold{color:var(--gold)}
+
+/* ── THE SHORT VERSION (three-up) ── */
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+.hcard{border-radius:10px;overflow:hidden}
+.hcard .top{padding:8px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.6px;color:#fff}
+.hcard .body{padding:20px 16px;text-align:center}
+.hcard .cap{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--dim)}
+.hcard .big{font-size:38px;font-weight:800;letter-spacing:-1.6px;line-height:1.1;margin:6px 0 3px}
+.hcard .fine{font-size:12.5px;color:var(--dim);line-height:1.5}
+.hcard.now{background:var(--red-bg)}.hcard.now .top{background:var(--red)}.hcard.now .big{color:var(--red)}
+.hcard.after{background:var(--panel)}.hcard.after .top{background:var(--navy)}.hcard.after .big{color:var(--navy)}
+.hcard.res{background:var(--callout)}.hcard.res .top{background:var(--green)}.hcard.res .big{color:var(--navy-deep)}
+.hcard.res .cap,.hcard.res .fine{color:var(--navy-deep);opacity:.85}
+
+/* ── SPLIT LAYOUT ── */
+.cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px}
+.miniH{font-size:13px;font-weight:700;color:var(--navy);margin:0 0 3px}
+.miniS{font-size:12px;color:var(--dim);margin-bottom:10px}
+
+/* ── TABLES ── */
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{background:var(--panel);color:var(--dim);padding:10px 12px;text-align:right;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border)}
+.tbl th:first-child{text-align:left}
+.tbl td{padding:10px 12px;text-align:right;border-bottom:1px solid #eef1f6;letter-spacing:-.2px;font-weight:600}
+.tbl td:first-child{text-align:left;color:var(--muted)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr.sum td{background:var(--panel);font-weight:800;color:var(--navy)}
+.tbl .bad{color:var(--red)}
+.tbl .save{color:var(--green-text)}
+.tbl .quiet{color:var(--dim);font-weight:500}
+
+/* ── LINE ITEMS ── */
+.li{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:9px 0;border-bottom:1px solid #eef1f6;font-size:13.5px}
+.li .k{color:var(--muted)}
+.li .v{font-weight:700;white-space:nowrap}
+.li.tot{border-bottom:none;border-top:2px solid var(--green);color:var(--green-deep);padding-top:11px}
+.li.tot .v{color:var(--green-deep)}
+
+/* ── BARS ── */
+.bars{display:flex;align-items:flex-end;justify-content:center;gap:40px;height:150px;margin:26px 0 10px}
+.barcol{width:78px;text-align:center;position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+.barcol .bh{border-radius:5px 5px 0 0}
+.barcol .bv{font-weight:800;font-size:14px;margin-bottom:5px}
+.barcol .bl{font-size:11.5px;color:var(--navy-deep);margin-top:7px;font-weight:600}
+.barcol.a .bh{background:var(--red)}.barcol.a .bv{color:var(--red)}
+.barcol.b .bh{background:var(--green)}.barcol.b .bv{color:var(--green-deep)}
+
+/* ── CALLOUTS ── */
+.band{background:var(--callout);border:1px solid #d6e2ac;border-radius:8px;padding:16px 18px;margin-top:16px}
+.band .k{font-size:11px;font-weight:700;color:var(--green-deep);text-transform:uppercase;letter-spacing:1px}
+.band .v{font-size:15px;font-weight:700;color:var(--green-deep);margin-top:5px;line-height:1.55}
+.band.alert{background:var(--red-bg);border-color:var(--red-line)}
+.band.alert .k,.band.alert .v{color:#8a1f1a}
+.band.navy{background:var(--panel);border-color:var(--panel-line)}
+.band.navy .k,.band.navy .v{color:var(--navy);text-align:center}
+
+.para{font-size:13.5px;color:var(--muted);line-height:1.7;margin-top:16px}
+.para strong{font-weight:700}
+
+/* ── SPLIT BAR ── */
+.splitbar{display:flex;height:38px;border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-top:10px}
+.splitbar div{display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}
+.splitlegend{display:flex;gap:22px;margin-top:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.splitlegend .sw{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:7px}
+
+/* ── PAYBACK styles removed ── */
+
+.note{font-size:12.5px;color:var(--dim);margin-top:8px;line-height:1.65;border-top:1px solid var(--border);padding-top:16px}
+
+@media print{.no-print{display:none!important}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}}
+@media(max-width:820px){
+  .fgrid{grid-template-columns:1fr 1fr}
+  .cols3{grid-template-columns:1fr;gap:24px}
+}
+@media(max-width:760px){
+  .bar{padding:18px 20px}.wrap{padding:16px 14px 40px}
+  .chead{display:none}
+  .crow{border-top:1px solid var(--border);padding:14px 0;gap:8px}
+  .crow .f-name{flex:1 1 100%}.crow .f-type{flex:1 1 100%}.crow .f-num{flex:1 1 calc(50% - 20px)}
+  .three{grid-template-columns:1fr}
+  .hcard .big{font-size:34px}
+  .fgrid{grid-template-columns:1fr}
+  .payback{grid-template-columns:1fr}
+
+  .tbl{font-size:13px}.tbl td,.tbl th{padding:9px 8px}
+}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const{useState,useMemo}=React;
-const fmt=v=>{if(v==null||isNaN(v))return"$0.00";return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",minimumFractionDigits:2}).format(v)};
-const fmt0=v=>{if(v==null||isNaN(v))return"$0";return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(v)};
-const fmtPct=v=>((v||0)*100).toFixed(3)+"%";
-function monthlyPI(p,ar,tm){if(p<=0||tm<=0)return 0;if(ar===0)return p/tm;const r=ar/12;return(p*r*Math.pow(1+r,tm))/(Math.pow(1+r,tm)-1)}
-/* Remaining balance after `paid` payments on an original loan of `p` at annual rate `ar`
-   over `tm` total months. Uses the closed-form amortization balance. */
-function balanceAfter(p,ar,tm,paid){if(p<=0||tm<=0)return 0;if(paid<=0)return p;if(paid>=tm)return 0;const r=ar/12;const base=monthlyPI(p,ar,tm);if(r===0)return Math.max(0,p-base*paid);const bal=p*Math.pow(1+r,paid)-base*((Math.pow(1+r,paid)-1)/r);return Math.max(0,bal)}
-function amortize(p,ar,tm,extra){const r=ar/12,base=monthlyPI(p,ar,tm);let bal=p;const rows=[];let totI=0,totP=0;for(let m=1;m<=tm&&bal>.005;m++){const ip=bal*r;let pp=base-ip+extra;if(pp>bal)pp=bal;bal=Math.max(0,bal-pp);totI+=ip;totP+=pp;rows.push({month:m,payment:ip+pp,principal:pp,interest:ip,balance:bal})}return{rows,totalInterest:totI,months:rows.length}}
-function findEffRate(p,tI,tm){let lo=0,hi=.5;for(let i=0;i<80;i++){const mid=(lo+hi)/2,r=mid/12;if(!r){lo=mid;continue}const pmt=(p*r*Math.pow(1+r,tm))/(Math.pow(1+r,tm)-1);if(pmt*tm-p<tI)lo=mid;else hi=mid}return(lo+hi)/2}
+const {useState, useMemo} = React;
 
-/* ── Building blocks ───────────────────────────────────────── */
+const money  = v => v==null||!isFinite(v) ? "$0" : new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(v);
+const CAP = 1200;
 
-function Card({children,title,subtitle,delay}){return(
-  <div className="card animate-in" style={{background:'#fff',border:'1px solid var(--border)',borderRadius:'var(--radius)',overflow:'hidden',animationDelay:(delay||0)+'ms'}}>
-    {title&&<div style={{background:'var(--navy)',padding:'16px 24px'}}>
-      <h2 style={{fontSize:17,fontWeight:700,color:'#fff',letterSpacing:-.3}}>{title}</h2>
-      {subtitle&&<p style={{fontSize:12,color:'rgba(255,255,255,.62)',marginTop:3,fontWeight:400}}>{subtitle}</p>}
-    </div>}
-    <div style={{padding:'24px'}}>{children}</div>
-  </div>)}
+/* months to pay off a balance at a fixed payment */
+function monthsToPayoff(bal, pmt, apr){
+  const r = apr/100/12;
+  if(!(bal>0)||!(pmt>0)) return null;
+  if(pmt <= bal*r + 1e-9) return {never:true};
+  if(r===0) return {months:bal/pmt};
+  return {months: Math.log(pmt/(pmt-bal*r))/Math.log(1+r)};
+}
+function totalInterest(bal, pmt, apr){
+  const m = monthsToPayoff(bal,pmt,apr);
+  if(!m || m.never) return {never:true};
+  return {months:m.months, interest: pmt*m.months - bal};
+}
+/* months to pay off a loan principal at a monthly rate & payment */
+function payoffMonths(principal, pmt, monthlyR){
+  if(!(pmt>0)) return Infinity;
+  if(pmt <= principal*monthlyR + 1e-9) return Infinity;
+  if(monthlyR===0) return principal/pmt;
+  return Math.log(pmt/(pmt-principal*monthlyR))/Math.log(1+monthlyR);
+}
+/* effective "like paying a rate of": rate whose full-term cost equals accelerated total cost */
+function effRate(principal, totalPaid, termMonths){
+  let lo=0, hi=0.35;
+  for(let k=0;k<70;k++){
+    const mid=(lo+hi)/2, r=mid/12;
+    const pay = r===0 ? principal/termMonths : principal*r/(1-Math.pow(1+r,-termMonths));
+    (pay*termMonths > totalPaid) ? hi=mid : lo=mid;
+  }
+  return (lo+hi)/2*100;
+}
 
-function Inp({label,value,onChange,prefix,suffix,step,hint}){return(
-  <div style={{display:'flex',flexDirection:'column',gap:7,flex:1,minWidth:130}}>
-    <label className="lbl">{label}</label>
-    <div className="field">
-      {prefix&&<span style={{color:'var(--dim)',fontSize:15,fontWeight:500,userSelect:'none'}}>{prefix}</span>}
-      <input type="number" value={value} step={step||"any"} onChange={e=>onChange(e.target.value===""?"":Number(e.target.value))}/>
-      {suffix&&<span style={{color:'var(--dim)',fontSize:14,userSelect:'none'}}>{suffix}</span>}
-    </div>
-    {hint&&<div style={{fontSize:11.5,color:'var(--muted)'}}>{hint}</div>}
-  </div>)}
+/* ── REVOLVING CARD: true minimum-payment compounding ──
+   Most issuers recompute the minimum every month as (percent of balance) + that
+   month's interest, floored at a dollar amount. The payment SHRINKS as the balance
+   falls, so payoff drags on for decades. The `pmt` the user enters is treated as the
+   starting minimum; we derive the issuer's percent from it so the sim matches reality. */
+const MIN_FLOOR = 35;      // typical dollar floor
+function revolvingMin(bal, apr, startPmt){
+  if(!(bal>0)||!(apr>=0)) return {never:true, months:0, interest:0};
+  const r = apr/100/12;
+  const firstInt = bal*r;
+  // The payment they gave us is the current minimum. If it can't cover this
+  // month's interest, the balance grows forever — the classic never-payoff trap.
+  if(startPmt>0 && startPmt <= firstInt + 1e-9) return {never:true, months:0, interest:0, startMin:startPmt, firstInt};
+  // infer the issuer's "percent of balance" from the payment they gave us
+  let pct = startPmt>0 ? (startPmt - firstInt)/bal : 0.01;
+  if(!isFinite(pct)||pct<=0) pct = 0.01;
+  const floor = Math.max(MIN_FLOOR, startPmt>0 ? Math.min(startPmt, MIN_FLOOR) : MIN_FLOOR);
+  let b=bal, ti=0, m=0;
+  const startMin = Math.max(pct*bal + firstInt, floor);
+  while(b>0.005 && m<1200){
+    const i = b*r;
+    let pay = Math.max(pct*b + i, floor);
+    if(pay >= b+i) pay = b+i;
+    const pr = pay - i;
+    if(pr <= 1e-6) return {never:true, months:0, interest:0, startMin, firstInt};
+    b -= pr; if(b<0.005) b=0;
+    ti += i; m++;
+  }
+  if(m>=1200) return {never:true, months:0, interest:0, startMin, firstInt};
+  return {never:false, months:m, interest:ti, startMin, firstInt};
+}
+/* Run a revolving card forward N months of shrinking minimums; report where it lands. */
+function revolvingForward(bal, apr, startPmt, months){
+  const r = apr/100/12;
+  const firstInt = bal*r;
+  let pct = (startPmt>0 && startPmt>firstInt) ? (startPmt - firstInt)/bal : 0.01;
+  if(!isFinite(pct)||pct<=0) pct = 0.01;
+  const floor = Math.max(MIN_FLOOR, startPmt>0 ? Math.min(startPmt, MIN_FLOOR) : MIN_FLOOR);
+  let b=bal, paid=0, ti=0;
+  for(let k=0;k<months;k++){
+    if(b<=0.005){ b=0; break; }
+    const i=b*r;
+    let pay=Math.max(pct*b+i, floor);
+    // if their real payment can't cover interest, model the balance growing
+    if(startPmt>0 && startPmt<=i){ pay = startPmt; }
+    if(pay>=b+i) pay=b+i;
+    const pr=pay-i;
+    if(pr<=0){ b += i-pay; paid+=pay; ti+=i; continue; }  // balance grows
+    b-=pr; paid+=pay; ti+=i;
+  }
+  return {balance:Math.max(0,b), paid, interest:ti, principalGone: bal-Math.max(0,b)};
+}
 
-function ModeInp({label,value,onChange,mode,onModeChange,prefix,suffix,step,hint}){return(
-  <div style={{display:'flex',flexDirection:'column',gap:7,flex:1,minWidth:160}}>
-    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8}}>
-      <label className="lbl">{label}</label>
-      <select value={mode} onChange={e=>onModeChange(e.target.value)} className="no-print" style={{fontSize:11,fontWeight:600,color:'var(--navy)',background:'var(--panel)',border:'1px solid var(--border)',borderRadius:6,padding:'3px 7px',cursor:'pointer',fontFamily:'inherit'}}>
-        <option value="annual">Annual</option><option value="monthly">Monthly</option>
-      </select>
-    </div>
-    <div className="field">
-      {prefix&&<span style={{color:'var(--dim)',fontSize:15,fontWeight:500,userSelect:'none'}}>{prefix}</span>}
-      <input type="number" value={value} step={step||"any"} onChange={e=>onChange(e.target.value===""?"":Number(e.target.value))}/>
-      {suffix&&<span style={{color:'var(--dim)',fontSize:14,userSelect:'none'}}>{suffix}</span>}
-    </div>
-    {hint&&<div style={{fontSize:11.5,color:'var(--muted)'}}>{hint}</div>}
-  </div>)}
+const TYPES = ["Mortgage","HELOC","Installment","Revolving"];
+const isRevolving = t => t==="Revolving";
 
+let uid = 100;
+const newDebt = () => ({id:++uid, name:"", type:"Revolving", bal:"", pmt:"", apr:"", months:""});
 
-const DEBT_CATS=['Mortgage','Credit Cards','Auto','Other Installments'];
-function DebtLine({debt,onChange,onRemove,canRemove}){return(
-  <div style={{display:'flex',flexWrap:'wrap',gap:10,alignItems:'flex-end'}}>
-    <div style={{display:'flex',flexDirection:'column',gap:7,flex:'1 1 180px',minWidth:150}}>
-      <label className="lbl">Category</label>
-      <div className="field" style={{padding:0}}>
-        <select value={debt.cat} onChange={e=>onChange({...debt,cat:e.target.value})} style={{border:'none',outline:'none',background:'transparent',fontSize:15,fontWeight:600,fontFamily:'inherit',color:'var(--ink)',padding:'11px 12px',width:'100%',cursor:'pointer'}}>
-          {DEBT_CATS.map(c=><option key={c} value={c}>{c}</option>)}
-        </select>
-      </div>
-    </div>
-    <div style={{display:'flex',flexDirection:'column',gap:7,flex:'1 1 130px',minWidth:120}}>
-      <label className="lbl">Balance</label>
-      <div className="field"><span style={{color:'var(--dim)',fontSize:15,fontWeight:500}}>$</span>
-        <input type="number" value={debt.bal} step="any" onChange={e=>onChange({...debt,bal:e.target.value===""?"":Number(e.target.value)})}/></div>
-    </div>
-    <div style={{display:'flex',flexDirection:'column',gap:7,flex:'1 1 130px',minWidth:120}}>
-      <label className="lbl">Monthly payment</label>
-      <div className="field"><span style={{color:'var(--dim)',fontSize:15,fontWeight:500}}>$</span>
-        <input type="number" value={debt.pmt} step="any" onChange={e=>onChange({...debt,pmt:e.target.value===""?"":Number(e.target.value)})}/></div>
-    </div>
-    <button onClick={onRemove} disabled={!canRemove} className="no-print" aria-label="Remove debt"
-      style={{width:38,height:38,flexShrink:0,border:'none',background:canRemove?'none':'none',color:canRemove?'var(--dim)':'var(--border)',fontSize:20,cursor:canRemove?'pointer':'default',borderRadius:6,marginBottom:1}}
-      onMouseOver={e=>{if(canRemove)e.currentTarget.style.background='#fdecea',e.currentTarget.style.color='var(--red)'}}
-      onMouseOut={e=>{e.currentTarget.style.background='none',e.currentTarget.style.color=canRemove?'var(--dim)':'var(--border)'}}>×</button>
-  </div>)}
+function App(){
+  const [debts,setDebts] = useState([
+    {id:1, name:"PENFED",   type:"HELOC",       bal:"123,335.84", pmt:"845.22", apr:"7.875", months:""},
+    {id:2, name:"BEST EGG", type:"Installment", bal:"31,177",     pmt:"695",    apr:"14",    months:"54"},
+    {id:3, name:"DISCOVER", type:"Revolving",   bal:"13,539",     pmt:"495",    apr:"23",    months:""},
+  ]);
+  const [loanAmt,setLoanAmt] = useState("175,000");
+  const [rate,setRate]       = useState("6.75");
+  const [term,setTerm]       = useState("30");
+  const [rateType,setRateType] = useState("Adjustable");
+  const [newPmt,setNewPmt]   = useState("1,330");
+  const [cashOut,setCashOut] = useState("2,631");
 
-function LoanTypeToggle({value,onChange}){const opts=['Conventional','FHA','VA'];return(
-  <div style={{display:'flex',flexDirection:'column',gap:7}}>
-    <label className="lbl">Loan type</label>
-    <div style={{display:'flex',background:'#fff',border:'1.5px solid var(--border)',borderRadius:8,overflow:'hidden'}}>
-      {opts.map((o,i)=>{const on=value===o;return(
-        <button key={o} onClick={()=>onChange(o)} style={{flex:1,background:on?'var(--navy)':'#fff',color:on?'#fff':'var(--dim)',border:'none',borderLeft:i>0?'1px solid var(--border)':'none',padding:'12px 8px',fontSize:15,fontWeight:on?600:500,cursor:'pointer',fontFamily:'inherit',transition:'background .18s,color .18s'}}>{o}</button>)})}
-    </div>
-  </div>)}
+  const n = s => { const v=parseFloat(String(s).replace(/[$,%\s]/g,"")); return isFinite(v)?v:0; };
 
-/* A single line in the right-hand summary panel. `dark` inverts it for the dark panel.
-   `sub` adds a smaller explanatory line beneath the label. */
-function SumRow({label,value,bold,accent,dark,sub}){return(
-  <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:16,padding:'13px 0',borderTop:`1px solid ${dark?'var(--panel-dark-line)':'var(--panel-line)'}`}}>
-    <span>
-      <span style={{fontSize:bold?15:14,fontWeight:bold?700:500,color:bold?(dark?'#fff':'var(--navy)'):(dark?'var(--panel-dark-muted)':'var(--muted)')}}>{label}</span>
-      {sub&&<span style={{display:'block',fontSize:11.5,fontWeight:400,color:dark?'var(--panel-dark-muted)':'var(--dim)',marginTop:2,lineHeight:1.4}}>{sub}</span>}
-    </span>
-    <span style={{fontSize:bold?17:15,fontWeight:bold?700:600,color:accent||(dark?'#fff':'var(--navy-soft)'),whiteSpace:'nowrap'}}>{value}</span>
-  </div>)}
+  const upd = (id,k,v) => setDebts(ds=>ds.map(d=>d.id===id?{...d,[k]:v}:d));
+  const add = () => setDebts(ds=>[...ds, newDebt()]);
+  const rm  = id => setDebts(ds=>ds.filter(d=>d.id!==id));
 
-function Callout({children,dark}){return(
-  <div style={dark
-    ? {background:'rgba(160,190,70,.13)',border:'1px solid rgba(160,190,70,.3)',borderRadius:8,padding:'14px 16px',fontSize:13.5,lineHeight:1.55,color:'#dbe6b4',fontWeight:500}
-    : {background:'var(--callout)',borderRadius:8,padding:'14px 16px',fontSize:13.5,lineHeight:1.55,color:'var(--green-deep)',fontWeight:500}}>{children}</div>)}
+  const R = useMemo(()=>{
+    const rows = debts.map(d=>{
+      const bal=n(d.bal), pmt=n(d.pmt), apr=n(d.apr), mo=n(d.months);
+      let ti;
+      if(isRevolving(d.type)){
+        // Revolving: shrinking-minimum compounding model
+        const rev = revolvingMin(bal, apr, pmt);
+        ti = rev.never ? {never:true} : {months:rev.months, interest:rev.interest};
+      } else if(mo>0){
+        // Term debt with a known number of months remaining: interest = payments made - balance
+        ti = {months:mo, interest: Math.max(0, pmt*mo - bal)};
+      } else {
+        // Term debt but months not entered — fall back to solving from the payment
+        ti = totalInterest(bal,pmt,apr);
+      }
+      return {...d, bal, pmt, apr, mo, rev:isRevolving(d.type), ti};
+    }).filter(d=>d.bal>0||d.pmt>0);
 
-function Stat({label,value,sub,color,large}){return(
-  <div style={{flex:1,minWidth:large?170:140,background:'var(--panel)',borderRadius:8,padding:large?'18px 20px':'14px 16px',border:'1px solid var(--border)'}}>
-    <div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.7,marginBottom:6}}>{label}</div>
-    <div style={{fontSize:large?27:20,fontWeight:700,color:color||'var(--navy)',letterSpacing:-.7,lineHeight:1.15}}>{value}</div>
-    {sub&&<div style={{fontSize:12,color:'var(--muted)',marginTop:5,lineHeight:1.45}}>{sub}</div>}
-  </div>)}
+    const totBal = rows.reduce((s,d)=>s+d.bal,0);
+    const totPmt = rows.reduce((s,d)=>s+d.pmt,0);
+    // Blended (weighted-average) rate across current debts, weighted by balance
+    const blended = totBal>0 ? rows.reduce((s,d)=>s+d.apr*d.bal,0)/totBal : 0;
 
-function CostBar({principal:p,interest:it,saved:sv}){const t=p+it+sv;if(!t)return null;
-  const s=[{pct:p/t*100,c:'#1e2b4d',l:'Principal',v:p},{pct:it/t*100,c:'#7d8699',l:'Interest paid',v:it}];
-  if(sv/t>.003)s.push({pct:sv/t*100,c:'#6f7f2e',l:'Interest saved',v:sv});
-  return(<div>
-    <div style={{display:'flex',height:34,borderRadius:8,overflow:'hidden',border:'1px solid var(--border)'}}>{s.map((x,i)=><div key={i} style={{width:x.pct+'%',background:x.c,display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontSize:11.5,fontWeight:600,transition:'width .5s'}}>{x.pct>14&&x.pct.toFixed(1)+'%'}</div>)}</div>
-    <div style={{display:'flex',gap:20,marginTop:11,flexWrap:'wrap'}}>{s.map((x,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:7,fontSize:12.5,color:'var(--navy-soft)'}}><span style={{width:10,height:10,borderRadius:3,background:x.c,display:'inline-block'}}/><span style={{fontWeight:600}}>{x.l}</span><span style={{color:'var(--muted)'}}>{fmt(x.v)}</span></div>)}</div>
-  </div>)}
+    const loan   = n(loanAmt);
+    const rt     = n(rate);
+    const tm     = n(term)||30;
+    const np     = n(newPmt);
+    const cash   = n(cashOut);
+    const r      = rt/100/12;
 
-function Chart({stdRows:sr,extRows:er,termMonths:tm}){if(!sr.length)return null;const W=640,H=240,PL=56,PB=36,PT=14,PR=14,mB=sr[0]?.balance||1;const xc=m=>PL+(m/tm)*(W-PL-PR),yc=b=>PT+(1-b/mB)*(H-PT-PB);const sp=Math.max(1,Math.floor(sr.length/100));const mk=rows=>rows.filter((_,i)=>i%sp===0||i===rows.length-1).map((r,i)=>`${i===0?'M':'L'}${xc(r.month).toFixed(1)},${yc(r.balance).toFixed(1)}`).join(' ');const pS=mk(sr),pE=mk(er);const area=pE+` L${xc(er[er.length-1].month).toFixed(1)},${yc(0).toFixed(1)} L${PL},${yc(0).toFixed(1)} Z`;const yT=[0,.25,.5,.75,1].map(f=>f*mB);const xY=[];for(let y=0;y<=Math.ceil(tm/12);y+=5)xY.push(y*12);
-  return(<svg viewBox={`0 0 ${W} ${H}`} style={{width:'100%',maxWidth:660,display:'block'}}>
-    <defs><linearGradient id="aG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#1e2b4d" stopOpacity=".13"/><stop offset="100%" stopColor="#1e2b4d" stopOpacity=".02"/></linearGradient></defs>
-    {yT.map((v,i)=><g key={i}><line x1={PL} y1={yc(v)} x2={W-PR} y2={yc(v)} stroke="#dee1e9" strokeWidth={.8}/><text x={PL-8} y={yc(v)+4} textAnchor="end" fontSize={10} fill="#7d8699" fontFamily="Inter">{v>=1000?'$'+(v/1000).toFixed(0)+'k':'$'+v.toFixed(0)}</text></g>)}
-    {xY.map((m,i)=><text key={i} x={xc(m)} y={H-8} textAnchor="middle" fontSize={10} fill="#7d8699" fontFamily="Inter">Yr {m/12}</text>)}
-    <path d={area} fill="url(#aG)"/>
-    <path d={pS} fill="none" stroke="#a9afbc" strokeWidth={2.2} strokeDasharray="6 3"/>
-    <path d={pE} fill="none" stroke="#1e2b4d" strokeWidth={2.8}/>
-    {er.length<sr.length&&<g><line x1={xc(er[er.length-1].month)} y1={PT} x2={xc(er[er.length-1].month)} y2={yc(0)} stroke="#6f7f2e" strokeWidth={1.2} strokeDasharray="4 3" opacity={.6}/><text x={xc(er[er.length-1].month)} y={PT+10} textAnchor="middle" fontSize={9.5} fill="#6f7f2e" fontWeight="600" fontFamily="Inter">Paid off</text></g>}
-    <g transform={`translate(${W-180},${PT+4})`}><line x1={0} y1={0} x2={20} y2={0} stroke="#a9afbc" strokeWidth={2} strokeDasharray="6 3"/><text x={24} y={4} fontSize={10.5} fill="#7d8699" fontFamily="Inter">Standard payoff</text><line x1={0} y1={18} x2={20} y2={18} stroke="#1e2b4d" strokeWidth={2.8}/><text x={24} y={22} fontSize={10.5} fill="#7d8699" fontFamily="Inter">With extra payments</text></g>
-  </svg>)}
+    const mSave = totPmt - np;
+    const ySave = mSave*12;
 
-function ConsolidationBar({curMtgBal:mb,totDebtBal:db,cashInHand:ch,closingCost:cc,escrowFund:ef,principal:p}){
-  const Part=({label,val,color})=>(<div style={{flex:'1 1 125px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}>{label}</div><div style={{fontSize:19,fontWeight:700,color:color||'var(--navy)',marginTop:4}}>{fmt(val)}</div></div>);
-  const Op=({c})=>(<div style={{fontSize:20,fontWeight:400,color:'#c7cddb',userSelect:'none'}}>{c}</div>);
-  return(<div style={{marginTop:18,padding:'18px 20px',background:'var(--panel)',borderRadius:8,border:'1px solid var(--border)'}}>
-    <div style={{display:'flex',flexWrap:'wrap',gap:14,alignItems:'center'}}>
-      <Part label="Current balance" val={mb}/><Op c="+"/><Part label="Debts consolidated" val={db}/>
-      {(cc||0)>0&&<React.Fragment><Op c="+"/><Part label="Closing costs" val={cc}/></React.Fragment>}
-      {(ef||0)>0&&<React.Fragment><Op c="+"/><Part label="Escrow funding" val={ef}/></React.Fragment>}
-      {(ch||0)>0&&<React.Fragment><Op c="+"/><Part label="Cash in hand" val={ch} color="var(--green)"/></React.Fragment>}
-      <Op c="="/>
-      <div style={{flex:'1 1 160px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--navy)',textTransform:'uppercase',letterSpacing:.6}}>New loan amount</div><div style={{fontSize:27,fontWeight:800,color:'var(--navy)',marginTop:4,letterSpacing:-.8}}>{fmt(p)}</div></div>
-    </div>
-  </div>)}
+    // accelerate: add % of monthly savings back to loan
+    const accel = [0,.25,.5,.75,1].map(p=>{
+      const extra = mSave*p;
+      const pay   = np+extra;
+      const mo    = payoffMonths(loan, pay, r);
+      const yrs   = mo/12;
+      const eff   = p===0 ? null : effRate(loan, pay*mo, tm*12);
+      return {p, extra, pay, yrs, mo, eff};
+    });
+    const normalInt = np*payoffMonths(loan,np,r) - loan;
+    const fullPay   = np+mSave;
+    const fullMo    = payoffMonths(loan, fullPay, r);
+    const fullInt   = fullPay*fullMo - loan;
+    const intSaved  = normalInt - fullInt;
 
-function AmortTable({rows,basePI}){return(
-  <div style={{marginTop:16,maxHeight:440,overflowY:'auto',border:'1px solid var(--border)',borderRadius:8}}>
-    <table style={{width:'100%',borderCollapse:'collapse',fontSize:12.5}}>
-      <thead><tr style={{background:'var(--panel)',position:'sticky',top:0,zIndex:2}}>{['Mo.','Payment','Principal','Interest','Extra','Balance'].map(h=><th key={h} style={{padding:'10px',textAlign:'right',fontWeight:600,color:'var(--muted)',fontSize:11,letterSpacing:.4,borderBottom:'1px solid var(--border)'}}>{h}</th>)}</tr></thead>
-      <tbody>{rows.map((r,i)=>{const bp=basePI-r.interest;const ex=r.principal-Math.max(0,bp);const yr=r.month%12===0;return(
-        <tr key={r.month} style={{background:yr?'var(--panel)':'#fff',borderBottom:'1px solid #eef1f6'}}>
-          <td style={{padding:'6px 10px',textAlign:'right',color:'var(--dim)',fontWeight:yr?600:400}}>{yr?`Yr ${r.month/12}`:r.month}</td>
-          <td style={{padding:'6px 10px',textAlign:'right',fontWeight:500}}>{fmt(r.payment)}</td>
-          <td style={{padding:'6px 10px',textAlign:'right',color:'var(--navy)',fontWeight:500}}>{fmt(Math.max(0,bp))}</td>
-          <td style={{padding:'6px 10px',textAlign:'right',color:'var(--muted)'}}>{fmt(r.interest)}</td>
-          <td style={{padding:'6px 10px',textAlign:'right',color:'var(--green)',fontWeight:600}}>{ex>.01?fmt(ex):'—'}</td>
-          <td style={{padding:'6px 10px',textAlign:'right',fontWeight:600}}>{fmt(r.balance)}</td>
-        </tr>)})}</tbody>
-    </table>
-  </div>)}
+    // do nothing
+    let dnInt=0, dnWorst=0, anyNever=false;
+    const dn = rows.map(d=>{
+      if(d.ti && d.ti.never){ anyNever=true; return {...d, never:true}; }
+      dnInt += d.ti.interest; dnWorst = Math.max(dnWorst, d.ti.months/12);
+      return {...d, never:false, years:d.ti.months/12, interest:d.ti.interest};
+    });
 
-/* ── Client presentation ───────────────────────────────────── */
-function PresentModal({onClose,R,rate,termYrs,totDebtBal,totDebtPmt,applyDebtSav,extraPmt,curTotalMtg,curMtgBal,cashInHand}){
-  const epy=Math.floor(R.extA.months/12),epm=R.extA.months%12,ys=Math.floor(R.moSaved/12),ms=R.moSaved%12,tco=curTotalMtg+totDebtPmt;
-  const Sec=({title,children,style:s})=>(<div style={{marginTop:30,...s}}>
-    <h3 style={{fontSize:12,fontWeight:700,color:'var(--muted)',letterSpacing:1.1,textTransform:'uppercase',marginBottom:14}}>{title}</h3>{children}</div>);
+    // ── Revolving cards: minimum-payment compounding story ──
+    const revCards = rows.filter(d=>d.rev);
+    const revBal   = revCards.reduce((s,d)=>s+d.bal,0);
+    const revPmt   = revCards.reduce((s,d)=>s+d.pmt,0);
+    let revInt=0, revNeverAny=false, revWorstMo=0;
+    revCards.forEach(d=>{
+      const rv = revolvingMin(d.bal,d.apr,d.pmt);
+      if(rv.never){ revNeverAny=true; }
+      else { revInt += rv.interest; revWorstMo = Math.max(revWorstMo, rv.months); }
+    });
+    const revTotalPaid = revBal + revInt;
+    // cost of waiting: forward the whole revolving stack N months
+    const waitPts = [6,12,24,36,60].map(w=>{
+      let bal=0, paid=0, ti=0, gone=0;
+      revCards.forEach(d=>{
+        const f = revolvingForward(d.bal,d.apr,d.pmt,w);
+        bal+=f.balance; paid+=f.paid; ti+=f.interest; gone+=f.principalGone;
+      });
+      return {w, bal, paid, interest:ti, gone};
+    });
+
+    return {rows, totBal, totPmt, blended, loan, rt, tm, np, cash, r,
+            mSave, ySave, accel, fullMo, intSaved, dn, dnInt, dnWorst, anyNever, rateType,
+            revCards, revBal, revPmt, revInt, revTotalPaid, revNeverAny, revWorstMo, waitPts};
+  },[debts,loanAmt,rate,term,rateType,newPmt,cashOut]);
+
+  const has = R.rows.length>0 && R.totBal>0;
+  const hasRev = R.revCards.length>0;
 
   return(
-    <div className="present-overlay" onClick={e=>{if(e.target===e.currentTarget)onClose()}}>
-      <div className="present-page" role="dialog" aria-label="New loan presentation">
+  <div>
+    <header className="bar">
+      <h1>Debt Consolidation <span>Calculator</span></h1>
+      <span className="tag">Turn high-rate debt into one lower payment</span>
+    </header>
 
-        <div style={{background:'var(--navy)',padding:'26px 36px',display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,flexWrap:'wrap'}}>
-          <div>
-            <h2 style={{fontSize:23,fontWeight:700,color:'#fff',letterSpacing:-.4}}>New Loan Presentation</h2>
-            <div style={{fontSize:11,fontWeight:600,color:'var(--gold)',textTransform:'uppercase',letterSpacing:2,marginTop:5}}>Prepared for your review</div>
+    <div className="wrap">
+
+      {/* ══════ INPUT: DEBTS ══════ */}
+      <div className="card no-print">
+        <div className="cardhdr">Current debts being paid off <span>— pull every balance from the credit report</span></div>
+        <div className="cardbody">
+          <div className="chead">
+            <span className="c-name">Creditor</span>
+            <span className="c-type">Type</span>
+            <span className="c-num">Balance</span>
+            <span className="c-num">Payment</span>
+            <span className="c-num">Rate</span>
+            <span className="c-num">Months left</span>
+            <span className="c-x"></span>
           </div>
-          <button onClick={onClose} aria-label="Close" className="no-print" style={{background:'rgba(255,255,255,.12)',border:'none',borderRadius:8,width:38,height:38,cursor:'pointer',color:'#fff',fontSize:21,display:'flex',alignItems:'center',justifyContent:'center'}} onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,.22)'} onMouseLeave={e=>e.currentTarget.style.background='rgba(255,255,255,.12)'}>×</button>
+          {debts.map((d,i)=>(
+            <div className="crow" key={d.id}>
+              <div className="f-name"><div className="inpwrap"><input className="txt" value={d.name} placeholder={"Creditor "+(i+1)} onChange={e=>upd(d.id,'name',e.target.value)}/></div></div>
+              <div className="f-type"><select className="rowsel" value={d.type} onChange={e=>upd(d.id,'type',e.target.value)}>{TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
+              <div className="f-num"><div className="inpwrap"><span className="pre">$</span><input value={d.bal} inputMode="decimal" placeholder="0" onChange={e=>upd(d.id,'bal',e.target.value)}/></div></div>
+              <div className="f-num"><div className="inpwrap"><span className="pre">$</span><input value={d.pmt} inputMode="decimal" placeholder="0" onChange={e=>upd(d.id,'pmt',e.target.value)}/></div></div>
+              <div className="f-num"><div className="inpwrap"><input value={d.apr} inputMode="decimal" placeholder="0.00" onChange={e=>upd(d.id,'apr',e.target.value)}/><span className="suf">%</span></div></div>
+              <div className="f-num">
+                {isRevolving(d.type)
+                  ? <div className="revtag">Revolving — no end date</div>
+                  : <div className="inpwrap"><input value={d.months} inputMode="numeric" placeholder="0" onChange={e=>upd(d.id,'months',e.target.value)}/><span className="suf">mo</span></div>}
+              </div>
+              <button className="xbtn" onClick={()=>rm(d.id)} title="Remove" aria-label="Remove debt">×</button>
+            </div>
+          ))}
+          <button className="addbtn" onClick={add}>+ Add another debt</button>
+
+          <div className="totals">
+            <div className="tot"><div className="k">Debts</div><div className="v">{R.rows.length}</div></div>
+            <div className="tot"><div className="k">Total balance</div><div className="v">{money(R.totBal)}</div></div>
+            <div className="tot"><div className="k">Total payments</div><div className="v red">{money(R.totPmt)}<span style={{fontSize:13,fontWeight:500,color:'var(--dim)'}}>/mo</span></div></div>
+            <div className="tot"><div className="k">Blended rate now</div><div className="v gold">{R.blended.toFixed(2)}%</div></div>
+          </div>
+        </div>
+      </div>
+
+      {/* ══════ INPUT: LOAN ══════ */}
+      <div className="card no-print">
+        <div className="cardhdr">Proposed loan &amp; client details</div>
+        <div className="cardbody">
+          <div className="fgrid">
+            <div className="field"><label>New loan amount</label><div className="inpwrap"><span className="pre">$</span><input value={loanAmt} inputMode="decimal" onChange={e=>setLoanAmt(e.target.value)}/></div></div>
+            <div className="field"><label>Interest rate</label><div className="inpwrap"><input value={rate} inputMode="decimal" onChange={e=>setRate(e.target.value)}/><span className="suf">%</span></div></div>
+            <div className="field"><label>Term</label><div className="inpwrap"><input value={term} inputMode="numeric" onChange={e=>setTerm(e.target.value)}/><span className="suf">yrs</span></div></div>
+            <div className="field"><label>Rate type</label><select value={rateType} onChange={e=>setRateType(e.target.value)}><option>Fixed</option><option>Adjustable</option></select></div>
+            <div className="field"><label>New payment w/ taxes &amp; ins</label><div className="inpwrap"><span className="pre">$</span><input value={newPmt} inputMode="decimal" onChange={e=>setNewPmt(e.target.value)}/></div></div>
+            <div className="field"><label>Extra cash to client</label><div className="inpwrap"><span className="pre">$</span><input value={cashOut} inputMode="decimal" onChange={e=>setCashOut(e.target.value)}/></div></div>
+          </div>
+        </div>
+      </div>
+
+      {has && <>
+        {/* ══════ THE SHORT VERSION ══════ */}
+        <div className="three">
+          <div className="hcard now"><div className="top">Now</div><div className="body"><div className="cap">What you pay today</div><div className="big">{money(R.totPmt)}</div><div className="fine">Mortgage plus the debts below</div></div></div>
+          <div className="hcard after"><div className="top">After</div><div className="body"><div className="cap">What you'd pay instead</div><div className="big">{money(R.np)}</div><div className="fine">One payment. That's it.</div></div></div>
+          <div className="hcard res"><div className="top">Results</div><div className="body"><div className="cap">What you keep each month</div><div className="big">{money(R.mSave)}</div><div className="fine">{money(R.ySave)} back every year</div></div></div>
         </div>
 
-        <div style={{padding:'4px 36px 36px'}}>
+        {/* ══════ WHERE THE MONEY GOES ══════ */}
+        <div className="card">
+          <div className="cardhdr">Current situation vs new loan details</div>
+          <div className="cardbody">
+            <div className="cols3">
+              {/* debts paid off */}
+              <div>
+                <div className="miniH">Current debts this plan pays off</div>
+                <div className="miniS">Everything rolled into the new loan</div>
+                <table className="tbl">
+                  <thead><tr><th>Who you owe</th><th>Balance</th><th>Payment</th></tr></thead>
+                  <tbody>
+                    {R.rows.map(d=><tr key={d.id}><td>{d.name||"—"}</td><td>{money(d.bal)}</td><td>{money(d.pmt)}</td></tr>)}
+                    <tr className="sum"><td>Total today</td><td>{money(R.totBal)}</td><td>{money(R.totPmt)}</td></tr>
+                  </tbody>
+                </table>
+                <div className="band navy" style={{marginTop:14}}>
+                  <div className="k">Blended rate on these debts</div>
+                  <div className="v" style={{fontSize:26,letterSpacing:'-1px'}}>{R.blended.toFixed(2)}%</div>
+                </div>
+              </div>
 
-          {/* Headline number */}
-          <div style={{marginTop:26,background:'var(--panel)',borderRadius:12,padding:'26px 28px',textAlign:'center'}}>
-            <div style={{fontSize:12,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:1.6}}>Your new total monthly payment</div>
-            <div style={{fontSize:56,fontWeight:800,color:'var(--green)',letterSpacing:-2.5,lineHeight:1.05,marginTop:6}}>{fmt0(R.totalPITI)}<span style={{fontSize:22,fontWeight:600,color:'var(--muted)',letterSpacing:-.5}}>/mo</span></div>
-            <div style={{fontSize:13.5,color:'var(--muted)',marginTop:6}}>Down from {fmt0(tco)}/mo across your mortgage and other monthly debts</div>
+              {/* payment comparison chart */}
+              <div>
+                <div className="miniH">Total monthly debt payments vs new loan payment</div>
+                <div className="miniS">Today vs with this plan</div>
+                <div className="bars">
+                  {(()=>{const mx=Math.max(R.totPmt,R.np)||1;return<>
+                    <div className="barcol a"><div className="bv">{money(R.totPmt)}</div><div className="bh" style={{height:(R.totPmt/mx*130)+'px'}}></div><div className="bl">Total monthly debts you pay today</div></div>
+                    <div className="barcol b"><div className="bv">{money(R.np)}</div><div className="bh" style={{height:(R.np/mx*130)+'px'}}></div><div className="bl">New monthly payment</div></div>
+                  </>;})()}
+                </div>
+                <div className="hcard res" style={{marginTop:18}}><div className="top">Results</div><div className="body"><div className="cap">What you keep each month</div><div className="big">{money(R.mSave)}</div><div className="fine">{money(R.ySave)} back every year</div></div></div>
+              </div>
+
+              {/* new loan + cash at closing */}
+              <div>
+                <div className="miniH">Your new loan</div>
+                <div className="miniS">The actual terms, in plain language</div>
+                <div className="li"><span className="k">Amount you're borrowing</span><span className="v">{money(R.loan)}</span></div>
+                <div className="li"><span className="k">Interest rate</span><span className="v">{R.rt}%</span></div>
+                <div className="li"><span className="k">Loan term</span><span className="v">{R.tm} years</span></div>
+                <div className="li"><span className="k">New monthly payment</span><span className="v">{money(R.np)}</span></div>
+                <div className="li"><span className="k">Will the rate change?</span><span className="v">{R.rateType==="Adjustable"?"Yes, it can adjust":"No, it's fixed"}</span></div>
+                <div className="miniH" style={{marginTop:18}}>Money you receive at closing</div>
+                <div className="miniS">Cash back when the loan funds</div>
+                <div className="li"><span className="k">Extra cash in hand</span><span className="v">{money(R.cash)}</span></div>
+                <div className="li tot"><span className="k">Total money in your pocket</span><span className="v">{money(R.cash)}</span></div>
+                <div className="band navy" style={{marginTop:14}}>
+                  <div className="v" style={{fontSize:16}}>One loan. One payment. One due date.</div>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <Sec title="What you pay today">
-            <div style={{border:'1px solid var(--border)',borderRadius:10,padding:'6px 20px 14px'}}>
-              <SumRow label="Mortgage payment (PITI)" sub="Principal, interest, taxes and insurance" value={fmt(curTotalMtg)}/>
-              <SumRow label="Current monthly debt payments" sub="(Monthly debt payments)" value={fmt(totDebtPmt)}/>
-              <SumRow label="Total monthly outgoing" value={fmt(tco)} bold/>
-            </div>
-          </Sec>
-
-          <Sec title="Your new payment">
-            <div style={{border:'1px solid var(--border)',borderRadius:10,padding:'6px 20px 14px'}}>
-              <SumRow label="Loan amount" value={fmt(R.principal)}/>
-              <SumRow label="Principal & interest" value={fmt(R.basePI)}/>
-              <SumRow label="Taxes + insurance / mo" value={fmt(R.mEscrow)}/>
-              <SumRow label="Debt payments" value="$0.00" accent="var(--green)"/>
-              <SumRow label="Total monthly (PITI)" value={fmt(R.totalPITI)} bold/>
-            </div>
-          </Sec>
-
-          {totDebtBal>0&&<Sec title="Debts paid off at closing">
-            <div style={{borderRadius:10,border:'1px solid var(--border)',overflow:'hidden'}}>
-              <table style={{width:'100%',borderCollapse:'collapse',fontSize:13.5}}>
-                <thead><tr style={{background:'var(--navy)'}}>
-                  {['','Balance paid off','Payment today','Payment after'].map((h,i)=><th key={i} style={{padding:'12px 16px',textAlign:i===0?'left':i===3?'center':'right',fontSize:11,fontWeight:600,color:'#fff',textTransform:'uppercase',letterSpacing:.8}}>{h}</th>)}
-                </tr></thead>
-                <tbody>
-                  <tr style={{background:'#fff'}}>
-                    <td style={{padding:'14px 16px',fontWeight:600,color:'var(--navy-soft)'}}>All debts being consolidated</td>
-                    <td style={{padding:'14px 16px',textAlign:'right',fontWeight:700,color:'var(--navy)',fontSize:15}}>{fmt(totDebtBal)}</td>
-                    <td style={{padding:'14px 16px',textAlign:'right',fontWeight:700,color:'var(--navy)',fontSize:15}}>{fmt(totDebtPmt)}/mo</td>
-                    <td style={{padding:'14px 16px',textAlign:'center'}}><span style={{display:'inline-block',background:'var(--callout)',color:'var(--green-deep)',padding:'5px 14px',borderRadius:14,fontSize:13.5,fontWeight:700}}>$0.00</span></td>
+        {/* ══════ OWN IT SOONER ══════ */}
+        <div className="card">
+          <div className="cardhdr">Want to own it sooner? <span>— optional accelerated payoff</span></div>
+          <div className="cardbody">
+            <p className="para" style={{marginTop:0}}>Send part of your monthly savings back to the loan and you finish years early, skipping a large amount of interest. You're never required to do this.</p>
+            <table className="tbl">
+              <thead><tr><th>If you add this each month</th><th>Your payment becomes</th><th>Mortgage-free in</th><th>Like paying a rate of</th></tr></thead>
+              <tbody>
+                {R.accel.map((a,i)=>(
+                  <tr key={i}>
+                    <td>{a.p===0 ? <span className="quiet">Nothing extra</span> : <>{money(a.extra)} <span className="quiet">({a.p*100}% of savings)</span></>}</td>
+                    <td>{money(a.pay)}</td>
+                    <td>{a.p===0 ? R.tm+" years" : a.yrs.toFixed(1)+" years"}</td>
+                    <td className={a.p===0?'quiet':'save'}>{a.p===0 ? "—" : a.eff.toFixed(3)+"%"}</td>
                   </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="band">
+              <div className="v">Keep paying {money(R.totPmt)} a month — exactly what you pay today — and you'd be mortgage-free in {(R.fullMo/12).toFixed(1)} years instead of {R.tm}, saving you {money(R.intSaved)} in interest. Same money out of pocket, very different finish line.</div>
+            </div>
+          </div>
+        </div>
+
+        {/* ══════ CREDIT CARD MINIMUM-PAYMENT TRAP ══════ */}
+        {hasRev && <div className="card">
+          <div className="cardhdr">The credit card trap <span>— what minimum payments really cost</span></div>
+          <div className="cardbody">
+            <p className="para" style={{marginTop:0}}>Credit cards have no end date. The minimum payment is recalculated every month as a small percent of the balance plus that month's interest — so as the balance drops, the payment shrinks too. Most of every dollar goes to interest, and payoff drags on for decades{R.revNeverAny ? ", or never happens at all" : ""}.</p>
+
+            <table className="tbl">
+              <thead><tr><th>Card</th><th>Balance</th><th>Rate</th><th>Min payment</th><th>Years to payoff</th><th>Interest you'll pay</th></tr></thead>
+              <tbody>
+                {R.revCards.map(d=>{
+                  const never = d.ti.never;
+                  return (
+                    <tr key={d.id}>
+                      <td>{d.name||"—"}</td><td>{money(d.bal)}</td><td>{d.apr}%</td><td>{money(d.pmt)}</td>
+                      {never
+                        ? <><td className="bad">Never</td><td className="bad">No end</td></>
+                        : <><td>{(d.ti.months/12).toFixed(1)} yrs</td><td className="bad">{money(d.ti.interest)}</td></>}
+                    </tr>
+                  );
+                })}
+                <tr className="sum"><td>All cards</td><td>{money(R.revBal)}</td><td></td><td>{money(R.revPmt)}</td><td>{R.revNeverAny ? "Never" : (R.revWorstMo/12).toFixed(1)+" yrs"}</td><td className="bad">{money(R.revInt)}</td></tr>
+              </tbody>
+            </table>
+
+            {/* balance vs interest split */}
+            <div style={{marginTop:20}}>
+              <div className="miniH">Where the money goes on {money(R.revBal)} of card balances</div>
+              <div className="splitbar">
+                <div style={{width:(R.revBal/R.revTotalPaid*100)+'%',background:'var(--navy)'}}>{(R.revBal/R.revTotalPaid)>0.13 && Math.round(R.revBal/R.revTotalPaid*100)+'%'}</div>
+                <div style={{width:(R.revInt/R.revTotalPaid*100)+'%',background:'var(--red)'}}>{(R.revInt/R.revTotalPaid)>0.13 && Math.round(R.revInt/R.revTotalPaid*100)+'%'}</div>
+              </div>
+              <div className="splitlegend">
+                <span><span className="sw" style={{background:'var(--navy)'}}></span>What they borrowed {money(R.revBal)}</span>
+                <span><span className="sw" style={{background:'var(--red)'}}></span>Interest {money(R.revInt)}</span>
+              </div>
+            </div>
+
+            {/* cost of waiting */}
+            <div style={{marginTop:22}}>
+              <div className="miniH">The cost of waiting</div>
+              <div className="miniS">Paying only the minimums, here's how little the balance actually moves</div>
+              <table className="tbl">
+                <thead><tr><th>If they wait</th><th>They'll have paid</th><th>Of that, interest</th><th>Balance still owed</th><th>Principal actually gone</th></tr></thead>
+                <tbody>
+                  {R.waitPts.map(w=>(
+                    <tr key={w.w}>
+                      <td>{w.w} months</td>
+                      <td>{money(w.paid)}</td>
+                      <td className="bad">{money(w.interest)}</td>
+                      <td>{money(w.bal)}</td>
+                      <td className="save">{money(w.gone)}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
-            <div style={{marginTop:12}}><Callout>These debts are paid in full at closing and folded into one mortgage payment — {fmt(totDebtPmt)} a month in separate bills goes away.</Callout></div>
-          </Sec>}
 
-          {(cashInHand||0)>0&&<Sec title="Cash in hand at closing">
-            <div style={{background:'var(--panel)',borderRadius:10,padding:'22px 24px'}}>
-              <div style={{fontSize:38,fontWeight:800,color:'var(--navy)',letterSpacing:-1.2}}>{fmt(cashInHand)}</div>
-              <div style={{fontSize:13.5,color:'var(--muted)',marginTop:6,lineHeight:1.55}}>Included in your new loan and available to you at closing for home improvements, reserves, or other goals.</div>
-            </div>
-          </Sec>}
-
-          <Sec title="Your estimated savings">
-            <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
-              <div style={{flex:'1 1 240px',background:'var(--panel)',borderRadius:10,padding:'22px 24px'}}>
-                <div style={{fontSize:11.5,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:1}}>Monthly cash flow freed up</div>
-                <div style={{fontSize:40,fontWeight:800,color:'var(--green)',marginTop:6,letterSpacing:-1.4}}>{fmt(R.monthlySav)}</div>
-              </div>
-              <div style={{flex:'1 1 240px',background:'var(--panel)',borderRadius:10,padding:'22px 24px'}}>
-                <div style={{fontSize:11.5,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:1}}>Estimated annual savings</div>
-                <div style={{fontSize:40,fontWeight:800,color:'var(--green)',marginTop:6,letterSpacing:-1.4}}>{fmt(R.monthlySav*12)}</div>
+            <div className="band alert">
+              <div className="v">{R.revNeverAny
+                ? "On at least one card, the minimum payment doesn't even cover the interest — the balance grows every month no matter how long they pay. On the cards that do get paid, minimum payments cost "+money(R.revInt)+" in interest along the way."
+                : "Paying only the minimums, these cards take "+(R.revWorstMo/12).toFixed(1)+" years to clear and cost "+money(R.revInt)+" in interest — "+(R.revInt>R.revBal ? (R.revInt/R.revBal).toFixed(1)+"× what was actually borrowed. " : "")+"Rolling them into the new loan stops the compounding today."}
               </div>
             </div>
-            <p style={{fontSize:13,color:'var(--muted)',lineHeight:1.65,marginTop:14}}>These are estimates based on the figures provided. Actual savings depend on final loan terms, closing costs, and your circumstances, and are not a guarantee of future results.</p>
-          </Sec>
+          </div>
+        </div>}
 
-          <Sec title="Accelerate your payoff">
-            <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
-              <div style={{flex:'1 1 240px',background:'var(--panel)',borderRadius:10,padding:'22px 24px'}}>
-                <div style={{fontSize:11.5,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:1}}>Payoff accelerated by</div>
-                <div style={{fontSize:34,fontWeight:800,color:'var(--navy)',marginTop:6,letterSpacing:-1}}>{R.moSaved>0?`${ys}yr ${ms}mo`:'—'}</div>
-                <div style={{fontSize:12.5,color:'var(--muted)',marginTop:5}}>Paid in {epy}yr {epm}mo instead of {termYrs}yr</div>
-              </div>
-              <div style={{flex:'1 1 240px',background:'var(--panel)',borderRadius:10,padding:'22px 24px'}}>
-                <div style={{fontSize:11.5,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:1}}>Total interest saved</div>
-                <div style={{fontSize:34,fontWeight:800,color:'var(--green)',marginTop:6,letterSpacing:-1}}>{fmt(R.intSaved)}</div>
-                <div style={{fontSize:12.5,color:'var(--muted)',marginTop:5}}>vs. minimum payments over {termYrs} years</div>
-              </div>
+        {/* ══════ DO NOTHING ══════ */}
+        <div className="card">
+          <div className="cardhdr">What happens if you do nothing</div>
+          <div className="cardbody">
+            <p className="para" style={{marginTop:0}}>At the payments you're making today, here's how long each debt sticks around and what it costs in interest.</p>
+            <table className="tbl">
+              <thead><tr><th>Debt</th><th>Balance</th><th>Rate</th><th>Payment</th><th>Years to gone</th><th>Interest you'll pay</th></tr></thead>
+              <tbody>
+                {R.dn.map(d=>(
+                  <tr key={d.id}>
+                    <td>{d.name||"—"}</td><td>{money(d.bal)}</td><td>{d.apr}%</td><td>{money(d.pmt)}</td>
+                    {d.never
+                      ? <><td className="bad">Never</td><td className="bad">No end</td></>
+                      : <><td>{d.years.toFixed(1)} yrs</td><td className="bad">{money(d.interest)}</td></>}
+                  </tr>
+                ))}
+                <tr className="sum"><td>Doing nothing</td><td>{money(R.totBal)}</td><td></td><td>{money(R.totPmt)}</td><td>{R.dnWorst.toFixed(1)} yrs</td><td className="bad">{money(R.dnInt)}</td></tr>
+              </tbody>
+            </table>
+            <div className="band alert">
+              <div className="v">Staying on this path costs about {money(R.dnInt)} in interest before these debts are gone{R.anyNever ? ", and at least one debt marked \u201CNever\u201D isn't being paid down at all — its real cost has no ceiling." : ", and the last one doesn't clear for "+R.dnWorst.toFixed(1)+" years."} This plan pays every one of them off at closing.</div>
             </div>
-            {applyDebtSav&&<div style={{marginTop:12}}><Callout>This assumes you put the {fmt(R.totalExtra)}/mo you free up back toward principal{extraPmt>0?` (${fmt(R.monthlySav)} in savings plus ${fmt(extraPmt)} extra)`:''}. Paying the minimum instead still lowers your monthly cost.</Callout></div>}
-          </Sec>
-
-          <Sec title="Your loan terms">
-            <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
-              {[['Interest rate',`${rate}%`,'Fixed rate'],['Loan term',`${termYrs} years`,`${termYrs*12} payments`],['New loan amount',fmt0(R.principal),'Total financed']].map((t,i)=>(
-                <div key={i} style={{flex:'1 1 200px',background:'var(--panel)',borderRadius:10,padding:'18px 22px',textAlign:'center'}}>
-                  <div style={{fontSize:11.5,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.9}}>{t[0]}</div>
-                  <div style={{fontSize:30,fontWeight:800,color:'var(--navy)',letterSpacing:-1,marginTop:5}}>{t[1]}</div>
-                  <div style={{fontSize:12,color:'var(--muted)',marginTop:3}}>{t[2]}</div>
-                </div>))}
-            </div>
-          </Sec>
-
-          <div className="no-print" style={{display:'flex',justifyContent:'center',marginTop:32}}>
-            <button onClick={onClose} style={{background:'#fff',color:'var(--muted)',border:'1.5px solid var(--border)',borderRadius:8,padding:'13px 26px',fontSize:14.5,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>← Back to calculator</button>
-          </div>
-
-          <p style={{textAlign:'center',fontSize:11.5,color:'var(--dim)',marginTop:18,lineHeight:1.6}}>For illustrative and educational purposes only. Not a loan commitment, approval, or financial advice. Actual terms, rates, fees, and payments may differ.</p>
-        </div>
-      </div>
-    </div>);
-}
-
-/* ── App ───────────────────────────────────────────────────── */
-function App(){
-  const[curLoanType,setCurLoanType]=useState('Conventional');
-  const[curOrigBal,setCurOrigBal]=useState(300000);      // original loan amount
-  const[curRate,setCurRate]=useState(6.5);
-  const[curOrigTerm,setCurOrigTerm]=useState(30);         // original term, years
-  const[curRemMonths,setCurRemMonths]=useState(300);      // remaining term, months
-  const[curPIManual,setCurPIManual]=useState(null);
-  const[curEscrow,setCurEscrow]=useState(425);   // combined taxes + insurance, monthly
-  const[curMIP,setCurMIP]=useState(0);const[curMIPMode,setCurMIPMode]=useState('monthly');
-  const[curUpfrontMIP,setCurUpfrontMIP]=useState(0);
-
-  // P&I auto-calculates from balance + rate + term; typing your own value overrides it.
-  // P&I is fixed by the ORIGINAL loan terms and never changes over its life.
-  const curTermMo=(curOrigTerm||0)*12;
-  const curPIAuto=monthlyPI(curOrigBal||0,(curRate||0)/100,curTermMo);
-  const curPI=curPIManual!=null?curPIManual:Math.round(curPIAuto*100)/100;
-  const curPIOverridden=curPIManual!=null;
-  // Today's balance = original balance amortized forward by the payments already made.
-  const curPaidMonths=Math.max(0,Math.min(curTermMo,curTermMo-(curRemMonths||0)));
-  const curMtgBal=Math.round(balanceAfter(curOrigBal||0,(curRate||0)/100,curTermMo,curPaidMonths)*100)/100;
-
-  const curMoEscrow=curEscrow||0;
-  const curMoMI=curLoanType==='FHA'?(curMIPMode==='annual'?(curMIP||0)/12:(curMIP||0)):0;
-  const curTotalMtg=(curPI||0)+curMoEscrow+curMoMI;
-
-  // Debts being consolidated, entered as two totals rather than line by line.
-  const[debts,setDebts]=useState([
-    {id:1,cat:'Credit Cards',bal:27315,pmt:828},
-    {id:2,cat:'Auto',bal:18185,pmt:307},
-  ]);
-  const addDebt=()=>setDebts(d=>[...d,{id:Date.now(),cat:'Other Installments',bal:"",pmt:""}]);
-  const updDebt=(i,nd)=>setDebts(d=>d.map((x,k)=>k===i?nd:x));
-  const rmDebt=i=>setDebts(d=>d.filter((_,k)=>k!==i));
-  const totDebtBal=debts.reduce((s,d)=>s+(Number(d.bal)||0),0);
-  const totDebtPmt=debts.reduce((s,d)=>s+(Number(d.pmt)||0),0);
-
-  const[rate,setRate]=useState(6.75);const[termYrs,setTermYrs]=useState(30);
-  const[newEscrow,setNewEscrow]=useState(425);   // combined taxes + insurance, monthly
-  const[cashInHand,setCashInHand]=useState(0);
-  const[closingCost,setClosingCost]=useState(0);
-  const[escrowFund,setEscrowFund]=useState(0);   // upfront escrow deposit funded at closing
-  const[extraPmt,setExtraPmt]=useState(0);const[applyDebtSav,setApplyDebtSav]=useState(true);
-  const[showAmort,setShowAmort]=useState(false);const[showPresent,setShowPresent]=useState(false);
-  // Loan-officer view only: apply the skipped first payment to the break-even. Off by default.
-  const[applySkip,setApplySkip]=useState(false);
-
-  const R=useMemo(()=>{
-    const principal=(curMtgBal||0)+totDebtBal+(cashInHand||0)+(closingCost||0)+(escrowFund||0);
-    const ar=(rate||0)/100,tm=(termYrs||30)*12;
-    const mEscrow=newEscrow||0;
-    const basePI=monthlyPI(principal,ar,tm);
-    const totalPITI=basePI+mEscrow;
-    const monthlySav=Math.max(0,(curTotalMtg+totDebtPmt)-totalPITI);
-    const totalExtra=(extraPmt||0)+(applyDebtSav?monthlySav:0);
-    const stdA=amortize(principal,ar,tm,0);
-    const extA=amortize(principal,ar,tm,totalExtra);
-    const intSaved=stdA.totalInterest-extA.totalInterest;
-    const moSaved=stdA.months-extA.months;
-    const effRate=totalExtra>0?findEffRate(principal,extA.totalInterest,tm):ar;
-    return{principal,basePI,totalPITI,monthlySav,totalExtra,stdA,extA,intSaved,moSaved,effRate,ar,tm,mEscrow,mMI:0};
-  },[curMtgBal,rate,termYrs,newEscrow,cashInHand,closingCost,escrowFund,extraPmt,applyDebtSav,totDebtBal,totDebtPmt,curTotalMtg]);
-
-  const ys=Math.floor(R.moSaved/12),ms=R.moSaved%12,epy=Math.floor(R.extA.months/12),epm=R.extA.months%12;
-  const tco=curTotalMtg+totDebtPmt;
-
-  return(<div style={{maxWidth:1120,margin:'0 auto',padding:'26px 18px 72px'}}>
-    {showPresent&&<PresentModal onClose={()=>setShowPresent(false)} R={R} rate={rate} termYrs={termYrs} totDebtBal={totDebtBal} totDebtPmt={totDebtPmt} applyDebtSav={applyDebtSav} extraPmt={extraPmt} curTotalMtg={curTotalMtg} curMtgBal={curMtgBal} cashInHand={cashInHand}/>}
-
-    {/* Masthead */}
-    <div className="animate-in" style={{background:'var(--navy)',borderRadius:'10px 10px 0 0',padding:'20px 28px',display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,flexWrap:'wrap'}}>
-      <div>
-        <h1 style={{fontSize:23,fontWeight:700,color:'#fff',letterSpacing:-.4}}>Mortgage Debt Calculator</h1>
-        <div style={{fontSize:12.5,fontWeight:600,color:'var(--gold)',textTransform:'uppercase',letterSpacing:2,marginTop:4}}>Current Loan Details</div>
-      </div>
-      <div style={{fontSize:12.5,fontWeight:600,color:'rgba(255,255,255,.55)',textTransform:'uppercase',letterSpacing:2}}>Turn many payments into one.</div>
-    </div>
-
-    {/* Split: inputs left, live summary right */}
-    <div className="animate-in" style={{display:'flex',flexWrap:'wrap',background:'#fff',border:'1px solid var(--border)',borderTop:'none',borderRadius:'0 0 10px 10px',overflow:'hidden',animationDelay:'40ms'}}>
-
-      {/* LEFT — current loan inputs */}
-      <div style={{flex:'1 1 460px',minWidth:300,padding:'26px 28px'}}>
-        <div style={{display:'flex',flexDirection:'column',gap:16}}>
-
-          <LoanTypeToggle value={curLoanType} onChange={setCurLoanType}/>
-
-          <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
-            <Inp label="Original loan amount" value={curOrigBal} onChange={setCurOrigBal} prefix="$"/>
-            <Inp label="Interest rate" value={curRate} onChange={setCurRate} suffix="%" step="0.125"/>
-          </div>
-
-          <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
-            <Inp label="Original term (years)" value={curOrigTerm} onChange={setCurOrigTerm} suffix="yr"/>
-            <Inp label="Remaining term (months)" value={curRemMonths} onChange={setCurRemMonths} suffix="mo" hint={curRemMonths>0?`${Math.floor((curRemMonths||0)/12)}yr ${(curRemMonths||0)%12}mo left · ${curPaidMonths} paid`:null}/>
-          </div>
-
-          {/* Today's balance, derived from the original loan and payments made. */}
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,background:'var(--callout)',border:'1px solid #d6e2ac',borderRadius:8,padding:'13px 16px'}}>
-            <div>
-              <div style={{fontSize:11,fontWeight:700,color:'var(--green-deep)',textTransform:'uppercase',letterSpacing:.8}}>Current balance today</div>
-              <div style={{fontSize:12,color:'var(--green-deep)',opacity:.8,marginTop:2}}>Original {fmt0(curOrigBal)} after {curPaidMonths} payments — rolls into the new loan</div>
-            </div>
-            <div style={{fontSize:26,fontWeight:800,color:'var(--green-deep)',letterSpacing:-.8}}>{fmt(curMtgBal)}</div>
-          </div>
-
-          {/* P&I — auto-calculated, override allowed */}
-          <div style={{display:'flex',flexDirection:'column',gap:7}}>
-            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8}}>
-              <label className="lbl">Principal &amp; interest</label>
-              {curPIOverridden
-                ? <button onClick={()=>setCurPIManual(null)} className="no-print" style={{fontSize:11,fontWeight:600,color:'var(--navy)',background:'none',border:'none',cursor:'pointer',padding:0,fontFamily:'inherit',textDecoration:'underline'}}>Reset to auto</button>
-                : <span style={{fontSize:10.5,fontWeight:700,color:'var(--green-deep)',background:'var(--callout)',borderRadius:4,padding:'2px 7px',textTransform:'uppercase',letterSpacing:.7}}>Auto</span>}
-            </div>
-            <div className="field" style={{background:curPIOverridden?'#fff':'var(--panel)'}}>
-              <span style={{color:'var(--dim)',fontSize:15,fontWeight:500,userSelect:'none'}}>$</span>
-              <input type="number" value={curPI} onChange={e=>setCurPIManual(e.target.value===""?null:Number(e.target.value))}/>
-            </div>
-            <div style={{fontSize:11.5,color:'var(--muted)'}}>{curPIOverridden?`Auto would be ${fmt(curPIAuto)} — using your figure.`:'Calculated from the original loan amount, rate and term — this payment is fixed for the life of the loan. Type over it to use the statement figure.'}</div>
-          </div>
-
-          <Inp label="Taxes + insurance (monthly)" value={curEscrow} onChange={setCurEscrow} prefix="$" hint="Combined monthly escrow — property taxes and homeowners insurance together."/>
-
-          {curLoanType==='FHA'&&<div style={{display:'flex',flexWrap:'wrap',gap:14}}>
-            <ModeInp label="MIP (mortgage insurance)" value={curMIP} onChange={setCurMIP} mode={curMIPMode} onModeChange={setCurMIPMode} prefix="$" hint={curMIPMode==='annual'&&curMIP>0?`= ${fmt(curMoMI)}/mo`:null}/>
-            <Inp label="Upfront MIP financed" value={curUpfrontMIP} onChange={setCurUpfrontMIP} prefix="$" hint="Usually already inside the payoff balance above."/>
-          </div>}
-
-        </div>
-      </div>
-
-      {/* RIGHT — live summary */}
-      <div style={{flex:'1 1 360px',minWidth:290,background:'var(--panel-dark)',padding:'26px 28px'}}>
-        <div style={{textAlign:'center'}}>
-          <div style={{fontSize:12,fontWeight:600,color:'var(--panel-dark-muted)',textTransform:'uppercase',letterSpacing:1.6}}>Their total monthly outgoing</div>
-          <div style={{fontSize:50,fontWeight:800,color:'var(--green-bright)',letterSpacing:-2.2,lineHeight:1.05,marginTop:4}}>{fmt0(tco)}<span style={{fontSize:20,fontWeight:600,color:'var(--panel-dark-muted)',letterSpacing:-.5}}>/mo</span></div>
-        </div>
-
-        <div style={{marginTop:16}}>
-          <Callout dark>
-            {totDebtPmt>0
-              ? <>That's the mortgage plus {fmt0(totDebtPmt)}/mo in other debt payments. Consolidating replaces all of it with one payment of <strong style={{color:'#fff'}}>{fmt0(R.totalPITI)}/mo</strong>.</>
-              : <>Add the debt totals below to see what consolidating into one payment would look like.</>}
-          </Callout>
-        </div>
-
-        <div style={{marginTop:18}}>
-          <SumRow dark label="Mortgage balance" value={fmt0(curMtgBal)}/>
-          <SumRow dark label="Principal & interest" value={fmt(curPI)}/>
-          <SumRow dark label="Taxes + insurance / mo" value={fmt(curMoEscrow)}/>
-          {curLoanType==='FHA'&&<SumRow dark label="MIP / mo" value={fmt(curMoMI)}/>}
-          <SumRow dark label="Current mortgage payment" value={fmt(curTotalMtg)} bold/>
-          <SumRow dark label="Debt payments" value={fmt(totDebtPmt)}/>
-          <SumRow dark label="Total monthly outgoing" value={fmt(tco)} bold accent="var(--green-bright)"/>
-        </div>
-
-        <div style={{marginTop:14,fontSize:11.5,color:'var(--panel-dark-muted)',lineHeight:1.5}}>{curLoanType} · {curRate||0}% · {curOrigTerm||0}-year term</div>
-      </div>
-    </div>
-
-    <div style={{display:'flex',flexDirection:'column',gap:18,marginTop:18}}>
-
-      <Card title="Debts to be paid off in the loan" subtitle="Add each debt being rolled into the new mortgage. Pick a category, then enter the balance and the current monthly payment." delay={80}>
-        <div style={{display:'flex',flexDirection:'column',gap:14}}>
-          {debts.map((d,i)=><DebtLine key={d.id} debt={d} onChange={nd=>updDebt(i,nd)} onRemove={()=>rmDebt(i)} canRemove={debts.length>1}/>)}
-        </div>
-        <button onClick={addDebt} className="no-print" style={{marginTop:14,display:'inline-flex',alignItems:'center',gap:7,background:'var(--panel)',border:'1.5px dashed var(--border)',borderRadius:8,padding:'11px 18px',fontSize:13.5,fontWeight:600,color:'var(--navy)',cursor:'pointer',fontFamily:'inherit'}}
-          onMouseOver={e=>e.currentTarget.style.borderColor='var(--navy)'} onMouseOut={e=>e.currentTarget.style.borderColor='var(--border)'}>
-          + Add a debt
-        </button>
-
-        <div style={{marginTop:18,padding:'18px 20px',background:'var(--panel)',borderRadius:8,border:'1px solid var(--border)',display:'flex',flexWrap:'wrap',gap:20}}>
-          <div style={{flex:'1 1 150px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}>Total debt balance</div><div style={{fontSize:23,fontWeight:700,color:'var(--navy)',marginTop:4}}>{fmt0(totDebtBal)}</div></div>
-          <div style={{flex:'1 1 150px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}>Current mortgage</div><div style={{fontSize:23,fontWeight:700,color:'var(--navy)',marginTop:4}}>{fmt(curTotalMtg)}<span style={{fontSize:13,fontWeight:500,color:'var(--muted)'}}>/mo</span></div></div>
-          <div style={{flex:'1 1 150px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}>Debt payments</div><div style={{fontSize:23,fontWeight:700,color:'var(--navy)',marginTop:4}}>{fmt(totDebtPmt)}<span style={{fontSize:13,fontWeight:500,color:'var(--muted)'}}>/mo</span></div></div>
-          <div style={{flex:'1 1 170px'}}><div style={{fontSize:11,fontWeight:600,color:'var(--green-deep)',textTransform:'uppercase',letterSpacing:.6}}>Total monthly outgoing</div><div style={{fontSize:26,fontWeight:800,color:'var(--green)',marginTop:4,letterSpacing:-.8}}>{fmt(tco)}<span style={{fontSize:13,fontWeight:500,color:'var(--muted)'}}>/mo</span></div></div>
-        </div>
-      </Card>
-
-      <Card title="New loan details" delay={120}>
-        <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
-          <Inp label="Interest rate" value={rate} onChange={setRate} suffix="%" step="0.125"/>
-          <Inp label="Loan term (years)" value={termYrs} onChange={setTermYrs} suffix="yr"/>
-        </div>
-        <div style={{display:'flex',flexWrap:'wrap',gap:14,marginTop:16}}>
-          <Inp label="Taxes + insurance (monthly)" value={newEscrow} onChange={setNewEscrow} prefix="$" hint="Combined monthly escrow — property taxes and homeowners insurance together."/>
-          <Inp label="Closing costs" value={closingCost} onChange={setClosingCost} prefix="$" hint="Rolled into the new loan."/>
-          <Inp label="Escrow account funding" value={escrowFund} onChange={setEscrowFund} prefix="$" hint="Upfront deposit to fund the escrow account at closing. Financed into the loan."/>
-          <Inp label="Cash in hand" value={cashInHand} onChange={setCashInHand} prefix="$"/>
-        </div>
-        <ConsolidationBar curMtgBal={curMtgBal} totDebtBal={totDebtBal} cashInHand={cashInHand} closingCost={closingCost} escrowFund={escrowFund} principal={R.principal}/>
-      </Card>
-
-      <Card title="Monthly payment comparison" delay={160}>
-        <div style={{display:'flex',flexWrap:'wrap',gap:16}}>
-          <div style={{flex:'1 1 250px',border:'1px solid var(--border)',borderRadius:10,padding:'6px 20px 14px'}}>
-            <div style={{fontSize:11.5,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:1,padding:'14px 0 2px'}}>Paying now</div>
-            <SumRow label="Mortgage (PITI)" value={fmt(curTotalMtg)}/>
-            <SumRow label="Debt payments" value={fmt(totDebtPmt)}/>
-            <SumRow label="Total" value={fmt(tco)} bold/>
-          </div>
-          <div style={{flex:'1 1 250px',border:'1px solid var(--border)',borderRadius:10,padding:'6px 20px 14px'}}>
-            <div style={{fontSize:11.5,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:1,padding:'14px 0 2px'}}>New payment</div>
-            <SumRow label="Principal & interest" value={fmt(R.basePI)}/>
-            <SumRow label="Escrow (taxes + ins)" value={fmt(R.mEscrow)}/>
-            <SumRow label="Debt payments" value="$0.00" accent="var(--green)"/>
-            <SumRow label="Total" value={fmt(R.totalPITI)} bold accent="var(--green)"/>
           </div>
         </div>
+      </>}
 
-        <div style={{marginTop:18,background:'var(--panel)',borderRadius:10,padding:'22px 24px',display:'flex',flexWrap:'wrap',gap:26,alignItems:'center'}}>
-          <div style={{flex:'1 1 240px'}}>
-            <div style={{fontSize:11.5,fontWeight:600,color:'var(--muted)',textTransform:'uppercase',letterSpacing:1}}>Monthly savings</div>
-            <div style={{fontSize:42,fontWeight:800,color:'var(--green)',marginTop:4,letterSpacing:-1.6}}>{fmt(R.monthlySav)}<span style={{fontSize:16,fontWeight:600,color:'var(--muted)'}}>/mo</span></div>
-            <div style={{fontSize:13,color:'var(--muted)',marginTop:5}}>{fmt(tco)} → {fmt(R.totalPITI)} · {fmt(R.monthlySav*12)} a year</div>
-          </div>
-          <div style={{flex:'1 1 230px',display:'flex',flexDirection:'column',gap:14}}>
-            <label style={{display:'flex',alignItems:'flex-start',gap:10,cursor:'pointer'}} className="no-print">
-              <input type="checkbox" checked={applyDebtSav} onChange={e=>setApplyDebtSav(e.target.checked)} style={{width:18,height:18,accentColor:'#6f7f2e',marginTop:2,flexShrink:0}}/>
-              <span><span style={{fontSize:14,fontWeight:600,color:'var(--navy)'}}>Put the savings back into principal</span><br/><span style={{fontSize:12.5,color:'var(--muted)'}}>Extra: <strong style={{color:'var(--green)'}}>{fmt(R.totalExtra)}</strong>/mo</span></span>
-            </label>
-            <Inp label="Additional extra payment" value={extraPmt} onChange={setExtraPmt} prefix="$"/>
-          </div>
-        </div>
+      {!has && <div className="card"><div className="cardbody"><p className="para" style={{marginTop:0}}>Add at least one debt with a balance to build the proposal.</p></div></div>}
 
-        {/* Break-even on closing costs — loan-officer reference, not shown to the client. */}
-        {(closingCost||0)>0&&R.monthlySav>0&&(()=>{
-          const skip=curPI||0;
-          const net=Math.max(0,(closingCost||0)-(applySkip?skip:0));
-          const mo=net/R.monthlySav;
-          const lbl=mo<1?'< 1 month':mo<12?`${Math.round(mo)} months`:`${Math.floor(mo/12)}yr ${Math.round(mo%12)}mo`;
-          return(
-          <div style={{marginTop:14,background:'var(--panel-dark)',borderRadius:10,padding:'18px 22px',display:'flex',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:16}}>
-            <div>
-              <div style={{fontSize:11,fontWeight:600,color:'var(--panel-dark-muted)',textTransform:'uppercase',letterSpacing:1.2}}>Break-even on closing costs <span style={{color:'var(--gold)'}}>· your view</span></div>
-              <div style={{fontSize:32,fontWeight:800,color:'var(--green-bright)',marginTop:4,letterSpacing:-1.2}}>{lbl}</div>
-              <div style={{fontSize:12.5,color:'var(--panel-dark-muted)',marginTop:4}}>
-                {fmt0(net)} closing costs ÷ {fmt0(R.monthlySav)}/mo saved{applySkip&&skip>0?` · after ${fmt0(skip)} skipped payment`:''}
-              </div>
-            </div>
-            <label className="no-print" style={{display:'flex',alignItems:'center',gap:9,cursor:'pointer',fontSize:12.5,fontWeight:600,color:'#fff',userSelect:'none'}}>
-              <span style={{position:'relative',width:38,height:22,flexShrink:0}}>
-                <input type="checkbox" checked={applySkip} onChange={e=>setApplySkip(e.target.checked)} style={{opacity:0,width:0,height:0}}/>
-                <span style={{position:'absolute',inset:0,borderRadius:22,background:applySkip?'var(--green)':'var(--panel-dark-line)',transition:'background .18s'}}></span>
-                <span style={{position:'absolute',top:3,left:applySkip?19:3,width:16,height:16,borderRadius:'50%',background:'#fff',transition:'left .18s'}}></span>
-              </span>
-              Apply skipped first payment
-            </label>
-          </div>);
-        })()}
-      </Card>
-
-      <Card title="Interest savings and payoff" delay={200}>
-        <div style={{display:'flex',flexWrap:'wrap',gap:14}}>
-          <Stat label="Effective rate" value={fmtPct(R.effRate)} sub={`Your ${rate}% behaves like ${fmtPct(R.effRate)} with ${fmt(R.totalExtra)}/mo extra.`} color="var(--navy)" large/>
-          <Stat label="Total interest saved" value={fmt(R.intSaved)} sub={R.totalExtra>0?`vs. minimum payments over ${termYrs} years`:"Add extra payments to see savings"} color="var(--green)" large/>
-          <Stat label="Payoff accelerated by" value={R.moSaved>0?`${ys}yr ${ms}mo`:"—"} sub={R.totalExtra>0?`Paid in ${epy}yr ${epm}mo instead of ${termYrs}yr`:""} color="var(--navy)" large/>
-        </div>
-        <div style={{marginTop:26}}><h3 style={{fontSize:11.5,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:1,marginBottom:12}}>Total loan cost</h3><CostBar principal={R.principal} interest={R.extA.totalInterest} saved={R.intSaved}/></div>
-        <div style={{marginTop:26}}><h3 style={{fontSize:11.5,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:1,marginBottom:12}}>Balance over time</h3><Chart stdRows={R.stdA.rows} extRows={R.extA.rows} termMonths={R.tm}/></div>
-        <div style={{marginTop:26,overflowX:'auto'}}>
-          <h3 style={{fontSize:11.5,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:1,marginBottom:12}}>Side by side</h3>
-          <table style={{width:'100%',borderCollapse:'collapse',fontSize:13.5}}>
-            <thead><tr style={{borderBottom:'1.5px solid var(--border)'}}>
-              <th style={{padding:'9px 12px',textAlign:'left',fontWeight:600,fontSize:11.5,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}></th>
-              <th style={{padding:'9px 12px',textAlign:'right',fontWeight:600,fontSize:11.5,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.6}}>Minimum only</th>
-              <th style={{padding:'9px 12px',textAlign:'right',fontWeight:600,fontSize:11.5,color:'var(--navy)',textTransform:'uppercase',letterSpacing:.6}}>With extra</th>
-              <th style={{padding:'9px 12px',textAlign:'right',fontWeight:600,fontSize:11.5,color:'var(--green-deep)',textTransform:'uppercase',letterSpacing:.6}}>Difference</th>
-            </tr></thead>
-            <tbody>{[["Monthly payment",fmt(R.basePI),fmt(R.basePI+R.totalExtra),fmt(R.totalExtra)],["Total interest",fmt(R.stdA.totalInterest),fmt(R.extA.totalInterest),fmt(R.intSaved)],["Total cost",fmt(R.principal+R.stdA.totalInterest),fmt(R.principal+R.extA.totalInterest),fmt(R.intSaved)],["Payoff time",`${termYrs}yr 0mo`,`${epy}yr ${epm}mo`,R.moSaved>0?`${ys}yr ${ms}mo earlier`:"—"]].map((r,i)=>(
-              <tr key={i} style={{borderBottom:'1px solid var(--panel-line)',background:i%2===0?'var(--panel)':'#fff'}}>
-                <td style={{padding:'11px 12px',fontWeight:600,color:'var(--navy-soft)'}}>{r[0]}</td>
-                <td style={{padding:'11px 12px',textAlign:'right',color:'var(--dim)'}}>{r[1]}</td>
-                <td style={{padding:'11px 12px',textAlign:'right',color:'var(--navy)',fontWeight:600}}>{r[2]}</td>
-                <td style={{padding:'11px 12px',textAlign:'right',color:'var(--green)',fontWeight:700}}>{r[3]}</td>
-              </tr>))}</tbody>
-          </table>
-        </div>
-      </Card>
-
-      <div className="no-print animate-in" style={{display:'flex',justifyContent:'center',animationDelay:'220ms'}}>
-        <button onClick={()=>setShowPresent(true)} style={{background:'var(--navy)',color:'#fff',border:'none',borderRadius:10,padding:'18px 48px',fontSize:16.5,fontWeight:700,cursor:'pointer',fontFamily:'inherit',boxShadow:'0 4px 18px rgba(30,43,77,.28)',transition:'transform .18s,box-shadow .18s'}} onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-1px)';e.currentTarget.style.boxShadow='0 8px 26px rgba(30,43,77,.36)'}} onMouseLeave={e=>{e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.boxShadow='0 4px 18px rgba(30,43,77,.28)'}}>Present new loan to client</button>
-      </div>
-
-      <Card title="Full amortization schedule" delay={250}>
-        <button onClick={()=>setShowAmort(!showAmort)} className="no-print" style={{background:showAmort?'var(--navy)':'#fff',color:showAmort?'#fff':'var(--navy)',border:'1.5px solid var(--navy)',borderRadius:8,padding:'11px 24px',cursor:'pointer',fontSize:13.5,fontWeight:600,fontFamily:'inherit',transition:'all .2s'}}>{showAmort?'Hide schedule':'Show month-by-month schedule'}</button>
-        {showAmort&&<AmortTable rows={R.extA.rows} basePI={R.basePI}/>}
-      </Card>
-
-      <p style={{textAlign:'center',fontSize:12,color:'var(--muted)',marginTop:6,lineHeight:1.65}}>For illustrative purposes only. Not a loan commitment or financial advice.<br/>Actual terms, rates, fees, and payments may vary.</p>
+      <p className="note">
+        The "like paying a rate of" figure compares the total cost of your loan when paid off early against what a full 30-year loan at that rate would cost — a comparison tool, not the rate on your loan. Balances, payments, and rates for current debts come from the information you provided. This is a proposal, not a loan commitment or an offer to lend; final numbers are confirmed in your official Loan Estimate and at closing.
+      </p>
     </div>
   </div>);
 }
