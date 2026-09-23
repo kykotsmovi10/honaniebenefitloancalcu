@@ -87,6 +87,7 @@
     color: var(--green-bright); letter-spacing: -1.2px; line-height: 1.1;
   }
   .summary-value.green { color: var(--green-bright); }
+  .summary-value.red { color: #e08a8a; }
 
   /* ── TOOL TITLE ── */
   .tool-title {
@@ -128,6 +129,7 @@
   }
   .field-value.calc { color: var(--navy); }
   .field-value.saved { color: var(--green-text); }
+  .field-value.cost { color: var(--red); }
 
   .term-inputs { display: flex; gap: 6px; align-items: center; }
   .term-inputs input { width: 62px; }
@@ -257,21 +259,21 @@
       <div class="panel-header">Original loan</div>
 
       <div class="field-row">
-        <span class="field-label">Principal (current loan balance)</span>
+        <span class="field-label">Original Principal Balance</span>
         <span>
           <input type="number" id="orig-principal" placeholder="$0.00" oninput="calc()">
           <span class="field-value-print" id="orig-principal-print"></span>
         </span>
       </div>
       <div class="field-row">
-        <span class="field-label">Annual interest rate</span>
+        <span class="field-label">Interest Rate</span>
         <span>
           <input type="number" id="orig-rate" placeholder="0.00%" oninput="calc()">
           <span class="field-value-print" id="orig-rate-print"></span>
         </span>
       </div>
       <div class="field-row">
-        <span class="field-label">Term</span>
+        <span class="field-label">Original Term</span>
         <span class="term-inputs">
           <input type="number" id="orig-term-yrs" placeholder="30" oninput="calc()">
           <span class="term-unit">yrs</span>
@@ -281,7 +283,7 @@
         </span>
       </div>
       <div class="field-row">
-        <span class="field-label">Remaining term <span style="color:var(--dim);font-weight:500;">(months left to pay)</span></span>
+        <span class="field-label">Remaining term <span style="color:var(--dim);font-weight:500;">(months left to pay today)</span></span>
         <span>
           <input type="number" id="orig-remaining-mo" placeholder="0" oninput="calc()">
           <span class="field-value-print" id="orig-remaining-mo-print"></span>
@@ -290,6 +292,10 @@
       <div class="field-row" style="margin-top:-2px;">
         <span class="field-label" style="font-size:0.78rem;color:var(--dim);">Remaining time on this loan</span>
         <span class="field-value" style="font-size:0.82rem;" id="orig-remaining-display">—</span>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Current balance <span style="color:var(--dim);font-weight:500;">(today, from remaining term)</span></span>
+        <span class="field-value calc" id="orig-current-balance">—</span>
       </div>
       <div class="field-row">
         <span class="field-label">Escrow (monthly) <span style="color:var(--dim);font-weight:500;">(taxes + insurance)</span></span>
@@ -311,7 +317,7 @@
         <span class="field-value calc" id="orig-years">—</span>
       </div>
       <div class="field-row" style="margin-top:8px;">
-        <span class="field-label" style="font-size:0.78rem;color:var(--dim);">Total interest paid</span>
+        <span class="field-label" style="font-size:0.78rem;color:var(--dim);">Remaining interest to be paid</span>
         <span class="field-value" style="font-size:0.82rem;color:var(--red);" id="orig-total-interest">—</span>
       </div>
     </div>
@@ -375,12 +381,8 @@
         <span class="field-value calc" id="new-years">—</span>
       </div>
       <div class="field-row">
-        <span class="field-label">Time saved vs baseline</span>
+        <span class="field-label">Time saved vs current loan</span>
         <span class="field-value saved" id="new-time-saved">—</span>
-      </div>
-      <div class="field-row">
-        <span class="field-label">Loan payments saved</span>
-        <span class="field-value saved" id="new-payments-saved">—</span>
       </div>
     </div>
   </div>
@@ -473,6 +475,8 @@ function balanceAtYear(schedule, year) {
 // ────────────────────────────────────────────────
 let lastOrigResult = null;
 let lastNewResult = null;
+let origCurrentBalance = 0;
+let origFullInterest = 0; // lifetime interest of the ORIGINAL loan, from origination over its full original term
 
 function calc() {
   const oP = num('orig-principal');
@@ -481,11 +485,13 @@ function calc() {
   const oTMo  = num('orig-term-mo');
   const oTotalMo = oTYrs * 12 + oTMo;
 
-  // Remaining term (months left to pay) is informational only — it does NOT
-  // affect the payment or payoff math below. The principal field is already
-  // the current outstanding balance, so the schedule computed from Term
-  // already represents the remaining-balance payoff path; this field just
-  // converts the months you enter into a years/months-left readout.
+  // Remaining term (months left to pay) now drives the calculation: it's
+  // used below to find today's actual balance by amortizing the loan from
+  // the Original Principal Balance forward by (Original Term - Remaining
+  // Term) months. Everything downstream — milestones, charts, and the
+  // savings comparison — is based on that current balance and the
+  // remaining term, not the original origination numbers, so it lines up
+  // apples-to-apples with the new loan (which also starts today).
   const oRemMo = num('orig-remaining-mo');
   const remDisplay = $('orig-remaining-display');
   if (oRemMo > 0) {
@@ -504,14 +510,39 @@ function calc() {
 
   // ORIGINAL LOAN
   if (oP && oR && oTotalMo) {
-    const origResult = amortize(oP, oR, oTotalMo, 0);
+    // Full amortization from origination, at the original payment amount.
+    const fullResult = amortize(oP, oR, oTotalMo, 0);
+
+    // Where "today" sits on that schedule: if Remaining term is blank/0,
+    // assume no time has elapsed (current balance = original principal).
+    const effRemaining = oRemMo > 0 ? Math.min(oRemMo, oTotalMo) : oTotalMo;
+    const elapsed = oTotalMo - effRemaining;
+    const currentBalance = elapsed <= 0
+      ? oP
+      : (fullResult.schedule[elapsed - 1] ? fullResult.schedule[elapsed - 1].balance : 0);
+
+    // The baseline used everywhere else (milestones, charts, savings) is the
+    // remainder of the schedule from today forward, so it starts at the same
+    // point in time as the new loan.
+    const futureSchedule = fullResult.schedule.slice(elapsed);
+    const futureInterest = futureSchedule.reduce((s, r) => s + r.interest, 0);
+    const origResult = {
+      months: futureSchedule.length,
+      totalInterest: futureInterest,
+      schedule: futureSchedule,
+      basePayment: fullResult.basePayment
+    };
     lastOrigResult = origResult;
+    origCurrentBalance = currentBalance;
+    origFullInterest = fullResult.totalInterest;
+
     const oEscrow = num('orig-escrow');
     const origTotalMonthly = origResult.basePayment + oEscrow;
     $('orig-payment').textContent = fmt(origResult.basePayment);
     $('orig-total-monthly').textContent = fmt(origTotalMonthly);
     $('orig-years').textContent = (origResult.months / 12).toFixed(1) + ' yrs';
     $('orig-total-interest').textContent = fmt(origResult.totalInterest);
+    $('orig-current-balance').textContent = fmt(currentBalance);
     $('orig-principal-print').textContent = fmt(oP);
     $('orig-rate-print').textContent = oR + '%';
     $('orig-term-print').textContent = oTYrs + ' yrs' + (oTMo ? ' ' + oTMo + ' mo' : '');
@@ -522,7 +553,10 @@ function calc() {
     $('orig-total-monthly').textContent = '—';
     $('orig-years').textContent = '—';
     $('orig-total-interest').textContent = '—';
+    $('orig-current-balance').textContent = '—';
     lastOrigResult = null;
+    origCurrentBalance = 0;
+    origFullInterest = 0;
   }
 
   // NEW LOAN
@@ -544,27 +578,41 @@ function calc() {
 
     if (lastOrigResult) {
       const timeSaved = lastOrigResult.months - newResult.months;
-      const origTotalPaid = lastOrigResult.months * lastOrigResult.basePayment;
-      const newTotalPaid  = newResult.months * (newResult.basePayment + nE);
-      const paymentsSaved = origTotalPaid - newTotalPaid;
-      const interestSaved = lastOrigResult.totalInterest - newResult.totalInterest;
+      // "Total interest savings" (top summary bar) compares against the
+      // ORIGINAL loan's full lifetime interest — what the client pays in
+      // total interest over the entire original term if they never
+      // refinanced — not just the interest remaining from today.
+      const interestSaved = origFullInterest - newResult.totalInterest;
+
+      // Time saved and interest saved are independent comparisons — a
+      // longer payoff (timeSaved <= 0) does not mean interest can't still
+      // be saved, so one does not gate the other.
+      const timeEl = $('new-time-saved');
       if (timeSaved > 0) {
-        $('new-time-saved').textContent = timeSaved + ' months (' + (timeSaved/12).toFixed(1) + ' yrs)';
-        $('new-payments-saved').textContent = paymentsSaved > 0 ? fmt(paymentsSaved) : '$0.00';
+        timeEl.textContent = timeSaved + ' months sooner (' + (timeSaved/12).toFixed(1) + ' yrs)';
+        timeEl.className = 'field-value saved';
         $('sum-time-saved').textContent = Math.floor(timeSaved/12) + ' yrs ' + (timeSaved%12) + ' mo';
-        $('sum-interest-saved').textContent = interestSaved > 0 ? fmt(interestSaved) : '$0.00';
+      } else if (timeSaved < 0) {
+        const t = Math.abs(timeSaved);
+        timeEl.textContent = t + ' months longer (' + (t/12).toFixed(1) + ' yrs)';
+        timeEl.className = 'field-value cost';
+        $('sum-time-saved').textContent = '-' + Math.floor(t/12) + ' yrs ' + (t%12) + ' mo';
       } else {
-        $('new-time-saved').textContent = '0 months';
-        $('new-payments-saved').textContent = '$0.00';
+        timeEl.textContent = '0 months';
+        timeEl.className = 'field-value saved';
         $('sum-time-saved').textContent = '0 mo';
-        $('sum-interest-saved').textContent = '$0.00';
       }
+
+      $('sum-interest-saved').textContent = interestSaved >= 0 ? fmt(interestSaved) : '-' + fmtN(interestSaved);
+      $('sum-interest-saved').className = 'summary-value ' + (interestSaved >= 0 ? 'green' : 'red');
     }
   } else {
-    ['new-base-payment','new-total-payment','new-total-monthly','new-years','new-time-saved','new-payments-saved']
-      .forEach(id => $(id).textContent = '—');
+    ['new-base-payment','new-total-payment','new-total-monthly','new-years'].forEach(id => $(id).textContent = '—');
+    $('new-time-saved').textContent = '—';
+    $('new-time-saved').className = 'field-value saved';
     $('sum-time-saved').textContent = '—';
     $('sum-interest-saved').textContent = '—';
+    $('sum-interest-saved').className = 'summary-value green';
     lastNewResult = null;
   }
 
@@ -640,7 +688,7 @@ function drawCostChart() {
     return;
   }
 
-  const origP = num('orig-principal');
+  const origP = origCurrentBalance;
   const origI = lastOrigResult.totalInterest;
   const newP = lastNewResult ? num('new-principal') : 0;
   const newI = lastNewResult ? lastNewResult.totalInterest : 0;
@@ -648,15 +696,15 @@ function drawCostChart() {
 
   const items = lastNewResult
     ? [
-        { label: 'Orig principal', val: origP, color: '#7d8699' },
-        { label: 'Orig interest', val: origI, color: '#a9afbc' },
+        { label: 'Current balance', val: origP, color: '#7d8699' },
+        { label: 'Remaining interest', val: origI, color: '#a9afbc' },
         { label: 'New principal', val: newP, color: '#1e2b4d' },
         { label: 'New interest', val: newI, color: '#2b3652' },
         { label: 'Interest saved', val: saved, color: '#6f7f2e' },
       ]
     : [
-        { label: 'Principal', val: origP, color: '#7d8699' },
-        { label: 'Interest paid', val: origI, color: '#a9afbc' },
+        { label: 'Current balance', val: origP, color: '#7d8699' },
+        { label: 'Remaining interest', val: origI, color: '#a9afbc' },
       ];
 
   const total = items.reduce((s, i) => s + i.val, 0);
@@ -704,7 +752,7 @@ function drawBalanceChart() {
   const newSched = lastNewResult ? lastNewResult.schedule : [];
   const maxMonths = Math.max(origSched.length, newSched.length);
   const maxBal = Math.max(
-    origSched[0] ? num('orig-principal') : 0,
+    origSched[0] ? origCurrentBalance : 0,
     newSched[0] ? num('new-principal') : 0
   );
 
@@ -742,7 +790,7 @@ function drawBalanceChart() {
     ctx.setLineDash([]);
   }
 
-  drawLine(origSched, '#a9afbc', num('orig-principal'), true);
+  drawLine(origSched, '#a9afbc', origCurrentBalance, true);
   if (newSched.length) drawLine(newSched, '#1e2b4d', num('new-principal'), false);
 
   // Paid-off marker
