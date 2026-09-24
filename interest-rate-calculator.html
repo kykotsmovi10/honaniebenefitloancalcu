@@ -69,6 +69,14 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .btn-clear:hover{background:var(--panel)}
 .btn:focus-visible,.inp:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
+/* ── TERM CHEAT SHEET ── */
+.cheat{margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.cheat-title{font-size:12.5px;font-weight:600;color:var(--dim);margin-bottom:10px}
+.cheat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.cheat-cell{background:var(--panel);border-radius:6px;padding:7px 4px;text-align:center;line-height:1.25}
+.cheat-cell b{display:block;font-size:13px;font-weight:700;color:var(--navy)}
+.cheat-cell small{display:block;font-size:11.5px;font-weight:500;color:var(--dim)}
+
 /* ── RESULTS (dark panel) ── */
 .resbox{flex:1 1 340px;min-width:290px;background:var(--panel-dark);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
 .reshdr{padding:18px 24px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
@@ -107,6 +115,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 
 @media print{.no-print{display:none!important}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}}
 @media(max-width:700px){.bar{padding:18px 20px}.wrap{padding:16px 14px 40px}.row label{width:104px;font-size:12.5px}.bigrate{font-size:42px}}
+@media(max-width:380px){.cheat-grid{grid-template-columns:repeat(5,1fr);gap:4px}.cheat-cell b{font-size:12px}.cheat-cell small{font-size:10.5px}}
 </style>
 </head>
 <body>
@@ -164,6 +173,22 @@ function Field({label,value,onChange,prefix}){
       <label>{label}</label>
       <input className="inp" value={value} inputMode="decimal"
         onChange={e=>onChange(e.target.value)} aria-label={label}/>
+    </div>);
+}
+
+/* Static reference: years to months, 1–10. */
+function TermCheatSheet(){
+  const yrs=[1,2,3,4,5,6,7,8,9,10];
+  return(
+    <div className="cheat no-print" aria-label="Years to months reference">
+      <div className="cheat-title">Years to months</div>
+      <div className="cheat-grid">
+        {yrs.map(y=>(
+          <div className="cheat-cell" key={y}>
+            <b>{y} yr</b>
+            <small>{y*12} mo</small>
+          </div>))}
+      </div>
     </div>);
 }
 
@@ -278,7 +303,6 @@ function App(){
 
       <header className="bar">
         <h1>Interest Rate <span>Calculator</span></h1>
-        <span className="tag">What rate is this loan really charging?</span>
       </header>
 
       <div className="wrap">
@@ -298,6 +322,7 @@ function App(){
             <button className="btn btn-go" onClick={run}>Calculate</button>
             <button className="btn btn-clear" onClick={clear}>Clear</button>
           </div>
+          <TermCheatSheet/>
         </div>
 
         <div className="resbox">
