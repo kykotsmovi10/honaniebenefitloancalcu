@@ -113,8 +113,8 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .li{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:9px 0;border-bottom:1px solid #eef1f6;font-size:13.5px}
 .li .k{color:var(--muted)}
 .li .v{font-weight:700;white-space:nowrap}
-.li.tot{border-bottom:none;border-top:2px solid var(--green);color:var(--green-deep);padding-top:11px}
-.li.tot .v{color:var(--green-deep)}
+.li.tot{border-bottom:none;border-top:3px solid var(--green);color:var(--green-deep);padding-top:13px;margin-top:4px}
+.li.tot .v{color:var(--green-deep);font-weight:800}
 
 /* ── BARS ── */
 .bars{display:flex;align-items:flex-end;justify-content:center;gap:40px;height:150px;margin:26px 0 10px}
@@ -273,7 +273,7 @@ function App(){
   const [loanAmt,setLoanAmt] = useState("175,000");
   const [rate,setRate]       = useState("6.75");
   const [term,setTerm]       = useState("30");
-  const [rateType,setRateType] = useState("Adjustable");
+  const [rateType,setRateType] = useState("Fixed");
   const [newPmt,setNewPmt]   = useState("1,330");
   const [cashOut,setCashOut] = useState("2,631");
 
@@ -309,6 +309,7 @@ function App(){
     const loan   = n(loanAmt);
     const rt     = n(rate);
     const tm     = n(term)||30;
+    const termMo = tm*12;
     const np     = n(newPmt);
     const cash   = n(cashOut);
     const r      = rt/100/12;
@@ -322,7 +323,7 @@ function App(){
       const pay   = np+extra;
       const mo    = payoffMonths(loan, pay, r);
       const yrs   = mo/12;
-      const eff   = p===0 ? null : effRate(loan, pay*mo, tm*12);
+      const eff   = p===0 ? null : effRate(loan, pay*mo, termMo);
       return {p, extra, pay, yrs, mo, eff};
     });
     const normalInt = np*payoffMonths(loan,np,r) - loan;
@@ -360,7 +361,7 @@ function App(){
       return {w, bal, paid, interest:ti, gone};
     });
 
-    return {rows, totBal, totPmt, blended, loan, rt, tm, np, cash, r,
+    return {rows, totBal, totPmt, blended, loan, rt, tm, termMo, np, cash, r,
             mSave, ySave, accel, fullMo, intSaved, dn, dnInt, dnWorst, anyNever, rateType,
             revCards, revBal, revPmt, revInt, revTotalPaid, revNeverAny, revWorstMo, waitPts};
   },[debts,loanAmt,rate,term,rateType,newPmt,cashOut]);
@@ -474,18 +475,11 @@ function App(){
               {/* new loan + cash at closing */}
               <div>
                 <div className="miniH">Your new loan</div>
-                <div className="li"><span className="k">Amount you're borrowing</span><span className="v">{money(R.loan)}</span></div>
+                <div className="li"><span className="k">Estimated loan amount</span><span className="v">{money(R.loan)}</span></div>
                 <div className="li"><span className="k">Interest rate</span><span className="v">{R.rt}%</span></div>
                 <div className="li"><span className="k">Loan term</span><span className="v">{R.tm} years</span></div>
-                <div className="li"><span className="k">New monthly payment</span><span className="v">{money(R.np)}</span></div>
-                <div className="li"><span className="k">Will the rate change?</span><span className="v">{R.rateType==="Adjustable"?"Yes, it can adjust":"No, it's fixed"}</span></div>
-                <div className="miniH" style={{marginTop:18}}>Money you receive at closing</div>
-                <div className="miniS">Cash back when the loan funds</div>
-                <div className="li"><span className="k">Extra cash in hand</span><span className="v">{money(R.cash)}</span></div>
-                <div className="li tot"><span className="k">Total money in your pocket</span><span className="v">{money(R.cash)}</span></div>
-                <div className="band navy" style={{marginTop:14}}>
-                  <div className="v" style={{fontSize:16}}>One loan. One payment. One due date.</div>
-                </div>
+                <div className="li"><span className="k">Estimated new monthly payment<br/><span style={{fontSize:11,fontWeight:500,color:'var(--dim)'}}>(new payment w/ taxes &amp; ins)</span></span><span className="v">{money(R.np)}</span></div>
+                {R.cash>0 && <div className="li tot"><span className="k">Cash you receive at funding</span><span className="v" style={{fontSize:22,letterSpacing:'-.5px'}}>{money(R.cash)}</span></div>}
               </div>
             </div>
           </div>
