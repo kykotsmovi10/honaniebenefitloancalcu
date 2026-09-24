@@ -64,10 +64,11 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .warn{font-size:12px;color:var(--red);font-weight:600;margin-top:8px}
 
 /* ── LOAN FIELD GRID ── */
-.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 20px}
-.field label{display:block;font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
+.fgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px 14px}
+.field label{display:block;font-size:10px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;line-height:1.3;min-height:26px}
+.field .inpwrap{padding:0 8px}
 .field .inpwrap input{text-align:left}
-.field select{width:100%;border:1.5px solid var(--border);background:var(--card);border-radius:8px;padding:8px 10px;font-size:14.5px;font-weight:600;font-family:inherit;color:var(--ink);cursor:pointer}
+.field select{width:100%;border:1.5px solid var(--border);background:var(--card);border-radius:8px;padding:8px 8px;font-size:14px;font-weight:600;font-family:inherit;color:var(--ink);cursor:pointer}
 .field select:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(30,43,77,.08)}
 
 /* ── TOTALS STRIP ── */
@@ -371,7 +372,6 @@ function App(){
   <div>
     <header className="bar">
       <h1>Debt Consolidation <span>Calculator</span></h1>
-      <span className="tag">Turn high-rate debt into one lower payment</span>
     </header>
 
     <div className="wrap">
@@ -445,8 +445,7 @@ function App(){
             <div className="cols3">
               {/* debts paid off */}
               <div>
-                <div className="miniH">Current debts this plan pays off</div>
-                <div className="miniS">Everything rolled into the new loan</div>
+                <div className="miniH">Current debts you pay now</div>
                 <table className="tbl">
                   <thead><tr><th>Who you owe</th><th>Balance</th><th>Payment</th></tr></thead>
                   <tbody>
@@ -463,7 +462,6 @@ function App(){
               {/* payment comparison chart */}
               <div>
                 <div className="miniH">Total monthly debt payments vs new loan payment</div>
-                <div className="miniS">Today vs with this plan</div>
                 <div className="bars">
                   {(()=>{const mx=Math.max(R.totPmt,R.np)||1;return<>
                     <div className="barcol a"><div className="bv">{money(R.totPmt)}</div><div className="bh" style={{height:(R.totPmt/mx*130)+'px'}}></div><div className="bl">Total monthly debts you pay today</div></div>
@@ -476,7 +474,6 @@ function App(){
               {/* new loan + cash at closing */}
               <div>
                 <div className="miniH">Your new loan</div>
-                <div className="miniS">The actual terms, in plain language</div>
                 <div className="li"><span className="k">Amount you're borrowing</span><span className="v">{money(R.loan)}</span></div>
                 <div className="li"><span className="k">Interest rate</span><span className="v">{R.rt}%</span></div>
                 <div className="li"><span className="k">Loan term</span><span className="v">{R.tm} years</span></div>
@@ -496,9 +493,9 @@ function App(){
 
         {/* ══════ OWN IT SOONER ══════ */}
         <div className="card">
-          <div className="cardhdr">Want to own it sooner? <span>— optional accelerated payoff</span></div>
+          <div className="cardhdr">Want to pay this off sooner? <span>— optional accelerated payoff</span></div>
           <div className="cardbody">
-            <p className="para" style={{marginTop:0}}>Send part of your monthly savings back to the loan and you finish years early, skipping a large amount of interest. You're never required to do this.</p>
+            <p className="para" style={{marginTop:0}}>Send part of your monthly savings back to the loan and you finish years early, skipping a large amount of interest.</p>
             <table className="tbl">
               <thead><tr><th>If you add this each month</th><th>Your payment becomes</th><th>Mortgage-free in</th><th>Like paying a rate of</th></tr></thead>
               <tbody>
